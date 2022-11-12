@@ -4,12 +4,12 @@ variable "aws_region" {
   description = "A região da AWS para fazer o deploy do servidor."
 }
 
-variable "sec_group_nomes" {
-  description = "IDs dos grupos de segurança"
-  type = map(object({
-    sec_names = list(string)
-  }))
-}
+# variable "sec_group_nomes" {
+#   description = "IDs dos grupos de segurança"
+#   type = map(object({
+#     sec_names = list(string)
+#   }))
+# }
 
 variable "virtual_machines" {
   description = "Informações sobre cada máquina a ser criada"
@@ -21,14 +21,23 @@ variable "virtual_machines" {
 
 variable "sec_group"{
   description = "Informações sobre cada grupo de segurança a ser criado"
-  type = map(object({
-    name = string
-    description = string
-    from_port = number
-    to_port = number
-    protocol = string
-    cidr_blocks = list(string)
-  }))
+  type = string
+  default = "security-group"
+}
+
+
+variable "sg_ingress_rules" {
+    type = map(object({
+      description = string
+      from_port   = number
+      to_port     = number
+      protocol    = string
+      cidr_blocks  = list(string)
+    }))
+}
+
+variable "security_groups"{
+  
 }
 
 # data "sec_group_id" "name" {

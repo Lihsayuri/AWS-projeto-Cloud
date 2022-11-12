@@ -24,7 +24,7 @@ resource "aws_vpc" "main" {
   instance_tenancy = "default"
 
   tags = {
-    Name = "VPC"
+    name = "VPC"
   }
 }
 
@@ -36,6 +36,35 @@ resource "aws_subnet" "main" {
     Name = "Subnet"
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # resource "aws_subnet" "private" {
 #   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, 1)
