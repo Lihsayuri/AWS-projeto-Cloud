@@ -45,3 +45,98 @@
     "aws_user_name": "teste",
     "aws_region": "us-east-1"
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+{
+    "virtual_machines": {
+        "vm1": {
+            "image_id": "ami-0149b2da6ceec4bb0",
+            "instance_type": "t2.micro"
+        },
+        "vm2": {
+            "image_id": "ami-0149b2da6ceec4bb0",
+            "instance_type": "t2.small"
+        }
+    },
+    "sec_group": "security-group",
+    "sg_ingress_rules" : {
+        "ssh-e-http": {
+            "description":"ssh libera",
+            "from_port": 22,
+            "to_port": 22 ,
+            "protocol": "tcp",
+            "cidr_blocks": ["0.0.0.0/0"]
+        },
+        "http": {
+            "description": "http libera",
+            "from_port": 443,
+            "to_port": 443,
+            "protocol": "tcp",
+            "cidr_blocks": ["0.0.0.0/0"]
+        }
+    },
+    "aws_user_name": "teste",
+    "aws_region": "us-east-1"
+}
+
+// -----------------------------------------------------------------------------
+
+{
+    "virtual_machines": {
+        "vm1": {
+            "image_id": "ami-0149b2da6ceec4bb0",
+            "instance_type": "t2.micro"
+        },
+        "vm2": {
+            "image_id": "ami-0149b2da6ceec4bb0",
+            "instance_type": "t2.small"
+        }
+    },
+    "sec_group": {
+        "ssh-http": {
+            "name": "ssh-http",
+            "ingress" : [
+                {
+                "ssh" : {
+                    "description" : "ssh libera",
+                    "from_port": 22,
+                    "to_port": 22,
+                    "protocol": "tcp",
+                    "cidr_blocks": ["0.0.0.0/0"]}
+                },
+                {
+                "http" : {
+                    "description" : "http libera",
+                    "from_port": 80,
+                    "to_port": 80,
+                    "protocol": "tcp",
+                    "cidr_blocks": ["0.0.0.0/0"]}
+                }
+            ]
+        },
+        "http": {
+            "name": "http",
+            "ingress" : [
+                {"http" : {
+                "description" : "http libera",
+                "from_port": 80,
+                "to_port": 80,
+                "protocol": "tcp",
+                "cidr_blocks": ["0.0.0.0/0"]}
+                }
+            ]
+        }
+    },
+    "sec_group_nomes": {
+        "vm1": {
+            "sec_names" : ["ssh-http"]
+        },
+        "vm2": 
+        {
+            "sec_names" : ["http"]
+        }
+    },
+    "aws_user_name": "teste",
+    "aws_region": "us-east-1"
+}
