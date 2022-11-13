@@ -4,13 +4,12 @@ import boto3
 import json
 
 contador = 0
-dict_variables = {"virtual_machines" : {},  "sg_ingress_rules" : {}}
+dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}}
 nome_instancias = []
+
 
 username = ""
 region = ""
-
-
 
 def escreve_documento(dict_variables):
     json_object = json.dumps(dict_variables, indent = 4)
@@ -71,6 +70,15 @@ def criar_usuario():
 
 
 def info_basicas():
+    print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
+    username = input("Digite o seu nome de usuário: ")
+    print("\n")
+
+    dict_variables.update({str("aws_user_name") : str(username)})
+    escreve_documento(dict_variables)
+
+
+
     print("Agora vamos para detalhes da AWS" + "\n")
     region = input("Digite a região do projeto: ")
     print("\n")
@@ -80,27 +88,22 @@ def info_basicas():
 
 
 def cria_sec_group():
-    print("""Vamos criar um grupo de segurança para a instância" \n""")
+    print("Vamos criar um grupo de segurança para a instância. Mas antes..." + "\n")
 
-    security_group_name = input("""Digite o nome do grupo de segurança: 
-    R: """)
-    print("\n")
+    qtd_sec_group = input("\n Quantos grupos de segurança você quer criar?" + "\n")
 
-    dict_variables.update({"sec_group" : security_group_name})
+    for i in range(int(qtd_sec_group)):
+        lista_group_name = []
 
+        security_group_name = input("Digite o nome do grupo de segurança: ")
+        print("\n")
 
-    print("Agora vamos para as regras do grupo de segurança. Mas antes..." + "\n")
+        qtd_rules = input("Quantas regras você quer criar para esse grupo de segurança? ")
 
-    criar_regras = input("Você gostaria de criar regras para o grupo de segurança? (y/n)")  
+        lista_regras = []
 
-    if criar_regras == "y" or "Y":
-
-        qtd_regras = input("Quantas regras você quer criar?")
-
-        for i in range(int(qtd_regras)):
-            nome_regra = input("Digite o nome da regra: ")
-            print("\n")
-            description_security_group = input("Digite a descrição do grupo de segurança: ")
+        for i in range(int(qtd_rules)):
+            description_security_group = input("Digite a descrição da regra do grupo de segurança: ")
             print("\n")
             aws_from_port = input("Digite a porta de origem: ")
             print("\n")
@@ -109,18 +112,88 @@ def cria_sec_group():
             aws_protocol = input("Digite o protocolo: ")
             print("\n")
             aws_cidr_blocks = input("Digite o bloco de ip: ")
+            print("\n")
 
-            dict_variables["sg_ingress_rules"].update({str(nome_regra) : {  "description" : str(description_security_group), \
-                                                                            "from_port" : str(aws_from_port), "to_port" : str(aws_to_port), \
-                                                                            "protocol" : str(aws_protocol), "cidr_blocks" : [str(aws_cidr_blocks)]}})
-    
+
+            null = None
+
+            dict_rules = {"ingress" : {"description" : str(description_security_group), \
+                                        "from_port" : str(aws_from_port), 
+                                        "to_port" : str(aws_to_port), \
+                                        "protocol" : str(aws_protocol), 
+                                        "ipv6_cidr_blocks" : null,  \
+                                        "prefix_list_ids" : null,  \
+                                        "self" : null,  \
+                                        "security_groups" : null,  \
+                                        "cidr_blocks" : [str(aws_cidr_blocks)]}}
+            
+            lista_regras.append(dict_rules)
+
+            dict_variables["sec_groups"].update({str(security_group_name) : {"name" : security_group_name, "ingress": lista_regras}})
+            escreve_documento(dict_variables)
+
+        flag = True
+        while flag:
+            nome_inst_sec = input("Não menos importante, qual(ou quais) instância(s) você quer associar a esse grupo de segurança?")
+
+            instancias = list(set(nome_inst_sec.split(",")))
+            # eliminar repetição de instancias
+
+            print(instancias)
+
+            for i in range(len(instancias)):
+                if instancias[i] not in nome_instancias:
+                    print("Você não digitou um nome válido. Tente novamente" + "\n")
+                else:
+                    if i == len(instancias)-1:
+                        flag = False
+
+        for nome_inst_sec_group in instancias:
+            if nome_inst_sec_group in dict_variables["sec_group_instances"]:
+                lista_group_name = dict_variables["sec_group_instances"][nome_inst_sec_group]["sec_names"]
+                lista_group_name.append(security_group_name)
+                dict_variables["sec_group_instances"].update({nome_inst_sec_group : {"sec_names" : lista_group_name}})
+            else:
+                dict_variables["sec_group_instances"].update({str(nome_inst_sec_group) : {"sec_names" : [str(security_group_name)] }})
+
+        escreve_documento(dict_variables)
+
+        # DEPOIS VÊ ISSO PARA COLOCAR O PADRÃO JUNTO E VER OS DESTROYS. DEPOIS PARTIR P OUTRAS REGIÕES
+        # cria_sec_group_padrao()
+
+
+
+def cria_sec_group_padrao():
+
+
+    lista_regras = []
+
+    null = None
+
+    dict_rules = {"ingress" : {"description" : "Allow inbound traffic", \
+                                "from_port" : 0, \
+                                "to_port" : 0, \
+                                "protocol" : -1, \
+                                "ipv6_cidr_blocks" : null, \
+                                "prefix_list_ids" : null, \
+                                "self" : null , \
+                                "security_groups" : null , \
+                                "cidr_blocks" : ["0.0.0.0/0"]}}
+            
+    lista_regras.append(dict_rules)
+
+    dict_variables["sec_groups"].update({"standard" : {"name" : "standard", "ingress": lista_regras}})
     escreve_documento(dict_variables)
 
 
+    for i in range(len(nome_instancias)):
+
+        dict_variables["sec_group_instances"].update({str(nome_instancias[i]) : {"sec_names" : ["standard"]}})
+        escreve_documento(dict_variables)
 
 
 
-def create_variables():
+def create_instances():
 
     qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
 
@@ -128,17 +201,23 @@ def create_variables():
         qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
 
     for contador in range(int(qtd_instancias)):
-        name_instance = input("""Digite o nome da instância: 
+        name_instance = input("""
+        
+        Digite o nome da instância: 
         
         R: """)
+        
         nome_instancias.append(name_instance)
 
-        image_id = input("""Digite o id da imagem a ser utilizada no servidor: 
+        image_id = input("""
+        
+        Digite o id da imagem a ser utilizada no servidor: 
         
         R: """)
         
         while True:
             instance_type_choice = input("""
+
             Agora você tem que escolher o tipo da instância a ser usada no servidor
             
             Você pode escolher dentre as seguintes: 
@@ -166,17 +245,18 @@ def create_variables():
         dict_variables["virtual_machines"].update({str(name_instance) : {"image_id" : str(image_id), "instance_type" : str(instance_type)}})
         escreve_documento(dict_variables)   
 
-        print("\n")
+    sec_group = input("Você quer criar security groups com regras? (y/n)")
 
+    while confere_resposta_nao_valida(sec_group):
         sec_group = input("Você quer criar um security group com regras? (y/n)")
 
-        while confere_resposta_nao_valida(sec_group):
-            sec_group = input("Você quer criar um security group com regras? (y/n)")
+    if sec_group == "y" or sec_group == "Y":
+        cria_sec_group()
+    elif sec_group == "n" or sec_group == "N":
+        print("Ok, então o grupo de segurança vai ser padrão" + "\n")
+        cria_sec_group_padrao()
 
-        if sec_group == "y" or sec_group == "Y":
-            cria_sec_group()
-        elif sec_group == "n" or sec_group == "N":
-            print("Ok, então o grupo de segurança vai ser padrão" + "\n")
+        print("\n")
 
 def lambda_handler_para(event, context, region):
     instances = [input("Agora digite o id da instância que você quer parar: ")]
@@ -270,7 +350,7 @@ def destruir_recurso():
 def listar_recursos():
     print("Mas antes vamos garantir que o programa está atualizado... Aguarde um momento")
 
-    os.system("terraform refresh")
+    refresh = os.popen("terraform refresh").read()
 
     escolha_listar = input("""Você quer listar:
     1- Instâncias e suas regiões;
@@ -287,7 +367,6 @@ def listar_recursos():
     elif escolha_listar == "2":
         print("Você escolheu listar grupos de segurança e suas regras" )
         os.system("terraform output sec_group_name")
-        os.system("terraform output sg_ingress_rules")
     elif escolha_listar == "3":
         print("Você escolheu listar usuários" )
         os.system("terraform output aws_iam_users")
@@ -301,14 +380,14 @@ def main():
     
     1- Iniciar uma instância existente;
     2- Parar uma instância existente;
-    3- Criar uma nova instância;
+    3- Criar uma nova instância e security groups;
     4- Destruir algum recurso;
     5 - Listar recursos;
     6 - Criar um usuário 
     
     R: """)
 
-    # info_basicas()
+    info_basicas()
 
 
     if primeira_resposta == "1":
@@ -323,7 +402,7 @@ def main():
         print("Você escolheu criar uma nova instância" + "\n")
 
         # Cria o arquivo variables.tfvars
-        create_variables()
+        create_instances()
 
         # os.system("terraform init")
         # os.system("source ~/.bashrc")
@@ -335,7 +414,7 @@ def main():
         destruir_recurso()
     elif primeira_resposta == "5":
         print("Você escolheu listar recursos" + "\n")
-        listar_recursos
+        listar_recursos()
     elif primeira_resposta == "6":
         print("Você escolheu criar um usuário" + "\n")
         criar_usuario()

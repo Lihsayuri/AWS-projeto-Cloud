@@ -1,56 +1,6 @@
 {
     "virtual_machines": {
         "vm1": {
-            "instance_id": "0",
-            "image_id": "ami-0149b2da6ceec4bb0",
-            "instance_type": "t2.micro"
-        },
-        "vm2": {
-            "instance_id": "1",
-            "image_id": "ami-0149b2da6ceec4bb0",
-            "instance_type": "t2.small"
-        }
-    },
-    "sec_group": {
-        "ssh": {
-            "name": "ssh",
-            "description": "ssh libera",
-            "from_port": "22",
-            "to_port": "22",
-            "protocol": "tcp",
-            "cidr_blocks": [
-                "0.0.0.0/0"
-            ]
-        },
-        "http": {
-            "name": "http",
-            "description": "http libera",
-            "from_port": "443",
-            "to_port": "443",
-            "protocol": "tcp",
-            "cidr_blocks": [
-                "0.0.0.0/0"
-            ]
-        }
-    },
-    "sec_group_nomes": {
-        "vm1": {
-            "sec_names" : ["ssh", "http"]
-        },
-        "vm2": 
-        {
-            "sec_names" : ["ssh"]
-        }
-    },
-    "aws_user_name": "teste",
-    "aws_region": "us-east-1"
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-{
-    "virtual_machines": {
-        "vm1": {
             "image_id": "ami-0149b2da6ceec4bb0",
             "instance_type": "t2.micro"
         },
@@ -59,58 +9,32 @@
             "instance_type": "t2.small"
         }
     },
-    "sec_group": "security-group",
-    "sg_ingress_rules" : {
-        "ssh-e-http": {
-            "description":"ssh libera",
-            "from_port": 22,
-            "to_port": 22 ,
-            "protocol": "tcp",
-            "cidr_blocks": ["0.0.0.0/0"]
-        },
-        "http": {
-            "description": "http libera",
-            "from_port": 443,
-            "to_port": 443,
-            "protocol": "tcp",
-            "cidr_blocks": ["0.0.0.0/0"]
-        }
-    },
-    "aws_user_name": "teste",
-    "aws_region": "us-east-1"
-}
-
-// -----------------------------------------------------------------------------
-
-{
-    "virtual_machines": {
-        "vm1": {
-            "image_id": "ami-0149b2da6ceec4bb0",
-            "instance_type": "t2.micro"
-        },
-        "vm2": {
-            "image_id": "ami-0149b2da6ceec4bb0",
-            "instance_type": "t2.small"
-        }
-    },
-    "sec_group": {
+    "sec_groups": {
         "ssh-http": {
             "name": "ssh-http",
             "ingress" : [
                 {
-                "ssh" : {
+                "ingress" : {
                     "description" : "ssh libera",
                     "from_port": 22,
                     "to_port": 22,
                     "protocol": "tcp",
+                    "ipv6_cidr_blocks": null,
+                    "prefix_list_ids": null,
+                    "self" : null,
+                    "security_groups": null,
                     "cidr_blocks": ["0.0.0.0/0"]}
                 },
                 {
-                "http" : {
+                "ingress" : {
                     "description" : "http libera",
                     "from_port": 80,
                     "to_port": 80,
                     "protocol": "tcp",
+                    "ipv6_cidr_blocks": null,
+                    "prefix_list_ids": null,
+                    "self" : null,
+                    "security_groups": null,
                     "cidr_blocks": ["0.0.0.0/0"]}
                 }
             ]
@@ -118,17 +42,21 @@
         "http": {
             "name": "http",
             "ingress" : [
-                {"http" : {
+                {"ingress" : {
                 "description" : "http libera",
                 "from_port": 80,
                 "to_port": 80,
                 "protocol": "tcp",
+                "ipv6_cidr_blocks": null,
+                "prefix_list_ids": null,
+                "self" : null,
+                "security_groups": null,
                 "cidr_blocks": ["0.0.0.0/0"]}
                 }
             ]
         }
     },
-    "sec_group_nomes": {
+    "sec_group_instances": {
         "vm1": {
             "sec_names" : ["ssh-http"]
         },
