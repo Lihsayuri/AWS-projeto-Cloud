@@ -11,6 +11,12 @@ nome_instancias = []
 username = ""
 region = ""
 
+def carrega_o_que_esta_no_json():
+    with open('.auto.tfvars.json', 'r') as json_file:
+        dict_variables = json.load(json_file)
+        print(dict_variables["sec_groups"]["ssh-http"])
+    return dict_variables
+
 def escreve_documento(dict_variables):
     json_object = json.dumps(dict_variables, indent = 4)
     with open('.auto.tfvars.json', 'w') as outfile:
@@ -88,6 +94,8 @@ def info_basicas():
 
 
 def cria_sec_group():
+    null = None
+
     print("Vamos criar um grupo de segurança para a instância. Mas antes..." + "\n")
 
     qtd_sec_group = input("\n Quantos grupos de segurança você quer criar?" + "\n")
@@ -100,7 +108,17 @@ def cria_sec_group():
 
         qtd_rules = input("Quantas regras você quer criar para esse grupo de segurança? ")
 
-        lista_regras = []
+        dict_standard_rule = {"ingress" : {"description" : "Allow inbound traffic", \
+                            "from_port" : 0, \
+                            "to_port" : 0, \
+                            "protocol" : -1, \
+                            "ipv6_cidr_blocks" : null, \
+                            "prefix_list_ids" : null, \
+                            "self" : null , \
+                            "security_groups" : null , \
+                            "cidr_blocks" : ["0.0.0.0/0"]}}
+
+        lista_regras = [dict_standard_rule]
 
         for i in range(int(qtd_rules)):
             description_security_group = input("Digite a descrição da regra do grupo de segurança: ")
@@ -113,9 +131,6 @@ def cria_sec_group():
             print("\n")
             aws_cidr_blocks = input("Digite o bloco de ip: ")
             print("\n")
-
-
-            null = None
 
             dict_rules = {"ingress" : {"description" : str(description_security_group), \
                                         "from_port" : str(aws_from_port), 
@@ -154,7 +169,7 @@ def cria_sec_group():
                 lista_group_name.append(security_group_name)
                 dict_variables["sec_group_instances"].update({nome_inst_sec_group : {"sec_names" : lista_group_name}})
             else:
-                dict_variables["sec_group_instances"].update({str(nome_inst_sec_group) : {"sec_names" : [str(security_group_name)] }})
+                dict_variables["sec_group_instances"].update({str(nome_inst_sec_group) : {"sec_names" : [str(security_group_name)]}})
 
         escreve_documento(dict_variables)
 
@@ -273,10 +288,14 @@ def lambda_handler_inicia(event, context, region):
 
 
 def destruir_recurso():
+
+    dict_variables = carrega_o_que_esta_no_json()
+
     destruir = input("""Qual recurso você gostaria de destruir:
     1- Instância;
     2- Grupo de sergurança;
-    3- Usuário
+    3- Usuário;
+    4- Regra de um grupo de segurança
     
     R: """)
 
@@ -299,6 +318,8 @@ def destruir_recurso():
         if destruir_yes_no == "y" or "Y":
             print("Ok, destruindo a instância" + "\n")
             dict_variables["virtual_machines"].pop(str(instancia_destruir))
+
+            # Se destruir instÂncia, destroi os security groups também?
             escreve_documento(dict_variables)
         elif destruir_yes_no == "n" or "N":
             print("Ok, então não destruiremos a instância" + "\n")
@@ -308,22 +329,26 @@ def destruir_recurso():
         Digite o nome do grupo de segurança que você quer destruir: 
         R: """)
 
-        regras = dict_variables["sg_ingress_rules"]
+        regras = str(dict_variables["sec_groups"][str(sec_group_destruir)])
 
-        destruir_yes_no = input("""Você está prestes a destruir o grupo de segurança {sec_group_destruir}, que possui as seguintes regras:
-        {regras} "\n" 
+        print(f'Você está prestes a destruir o grupo de segurança {sec_group_destruir}, que possui as seguintes regras: {regras} "\n" ')
         
-        Você tem certeza que quer destruir o grupo de segurança? (y/n)
+        destruir_yes_no = input("""Você tem certeza que quer destruir o grupo de segurança? (y/n)
         R: """)
 
         while confere_resposta_nao_valida(destruir_yes_no):
-            destruir_yes_no = input("Você tem certeza que quer destruir o grupo de segurança? (y/n)")
+            destruir_yes_no = input("Você tem certeza que quer destruir o grupo de segurança? Obs: destruir significa apagar todas as regras, EXCETO a padrão (y/n)")
 
         if destruir_yes_no == "y" or "Y":
             print("Ok, destruindo o grupo de segurança" + "\n")
-            dict_variables.pop("sec_group")
-            dict_variables.pop("sg_ingress_rules")
-            escreve_documento(dict_variables)
+            
+            size = len(dict_variables["sec_groups"][str(sec_group_destruir)]["ingress"])
+            while size > 1:
+                if dict_variables["sec_groups"][str(sec_group_destruir)]["ingress"][size-1]["ingress"]["description"] != "Allow inbound traffic":
+                    dict_variables["sec_groups"][str(sec_group_destruir)]["ingress"].pop()
+                    size = size - 1
+                    escreve_documento(dict_variables)
+
         elif destruir_yes_no == "n" or "N":
             print("Ok, então não destruiremos o grupo de segurança" + "\n")
 
@@ -345,6 +370,39 @@ def destruir_recurso():
             escreve_documento(dict_variables)
         elif destruir_yes_no == "n" or "N":
             print("Ok, então não destruiremos o usuário" + "\n")
+
+    elif destruir == "4":
+        sec_group_destruir_regra = input("""Você escolheu destruir uma regra de um grupo de segurança. 
+        Digite o nome do grupo de segurança que você quer destruir a regra: 
+        R: """)
+
+        regras = dict_variables["sec_groups"][str(sec_group_destruir_regra)]
+
+        print(f'Você está prestes a destruir alguma regra do grupo de segurança {sec_group_destruir_regra}, que possui as seguintes regras:')
+
+
+        for i in range(len(dict_variables["sec_groups"][str(sec_group_destruir_regra)]["ingress"])):
+            # mostrar apenas description, protocol, from_port, to_port, cidr_blocks
+            topico = dict_variables["sec_groups"][str(sec_group_destruir_regra)]["ingress"][i]["ingress"]
+
+            print(f' {i} - {topico["description"]}, {topico["protocol"]}, {topico["from_port"]}, {topico["to_port"]}, {topico["cidr_blocks"]}')
+
+        regra_destruir = input(f'Qual regra você quer destruir do grupo de segurança {sec_group_destruir_regra}? Digite o número da regra que você quer destruir:')
+
+
+        destruir_yes_no = input("""
+        Você tem certeza que quer destruir a regra {regra_destruir} do grupo de segurança? (y/n)
+        R: """)
+
+        while confere_resposta_nao_valida(destruir_yes_no):
+            destruir_yes_no = input("Você tem certeza que quer destruir a regra {regra_destruir} do grupo de segurança? (y/n)")
+
+        if destruir_yes_no == "y" or "Y":
+            print("Ok, destruindo a regra do grupo de segurança" + "\n")
+            dict_variables["sec_groups"][str(sec_group_destruir_regra)]["ingress"].pop(int(regra_destruir))
+            escreve_documento(dict_variables)
+        elif destruir_yes_no == "n" or "N":
+            print("Ok, então não destruiremos a regra do grupo de segurança" + "\n")
 
 
 def listar_recursos():
@@ -387,7 +445,7 @@ def main():
     
     R: """)
 
-    info_basicas()
+    # info_basicas()
 
 
     if primeira_resposta == "1":
@@ -424,6 +482,7 @@ def main():
 
 # Executa a função main
 main()
+# destruir_recurso()
 
 
 

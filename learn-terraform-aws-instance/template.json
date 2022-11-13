@@ -12,57 +12,98 @@
     "sec_groups": {
         "ssh-http": {
             "name": "ssh-http",
-            "ingress" : [
+            "ingress": [
                 {
-                "ingress" : {
-                    "description" : "ssh libera",
-                    "from_port": 22,
-                    "to_port": 22,
-                    "protocol": "tcp",
-                    "ipv6_cidr_blocks": null,
-                    "prefix_list_ids": null,
-                    "self" : null,
-                    "security_groups": null,
-                    "cidr_blocks": ["0.0.0.0/0"]}
+                    "ingress": {
+                        "description": "Allow inbound traffic",
+                        "from_port": 0,
+                        "to_port": 0,
+                        "protocol": -1,
+                        "ipv6_cidr_blocks": null,
+                        "prefix_list_ids": null,
+                        "self": null,
+                        "security_groups": null,
+                        "cidr_blocks": [
+                            "0.0.0.0/0"
+                        ]
+                    }
                 },
                 {
-                "ingress" : {
-                    "description" : "http libera",
-                    "from_port": 80,
-                    "to_port": 80,
-                    "protocol": "tcp",
-                    "ipv6_cidr_blocks": null,
-                    "prefix_list_ids": null,
-                    "self" : null,
-                    "security_groups": null,
-                    "cidr_blocks": ["0.0.0.0/0"]}
-                }
+                    "ingress": {
+                        "description": "ssh libera",
+                        "from_port": "22",
+                        "to_port": "22",
+                        "protocol": "tcp",
+                        "ipv6_cidr_blocks": null,
+                        "prefix_list_ids": null,
+                        "self": null,
+                        "security_groups": null,
+                        "cidr_blocks": [
+                            "0.0.0.0/0"
+                        ]
+                    }
+                },
+                {
+                    "ingress" : {
+                        "description" : "http libera",
+                        "from_port": 80,
+                        "to_port": 80,
+                        "protocol": "tcp",
+                        "ipv6_cidr_blocks": null,
+                        "prefix_list_ids": null,
+                        "self" : null,
+                        "security_groups": null,
+                        "cidr_blocks": ["0.0.0.0/0"]
+                    }
+                }                
             ]
         },
-        "http": {
-            "name": "http",
-            "ingress" : [
-                {"ingress" : {
-                "description" : "http libera",
-                "from_port": 80,
-                "to_port": 80,
-                "protocol": "tcp",
-                "ipv6_cidr_blocks": null,
-                "prefix_list_ids": null,
-                "self" : null,
-                "security_groups": null,
-                "cidr_blocks": ["0.0.0.0/0"]}
+        "ssh-only": {
+            "name": "ssh-only",
+            "ingress": [
+                {
+                    "ingress": {
+                        "description": "Allow inbound traffic",
+                        "from_port": 0,
+                        "to_port": 0,
+                        "protocol": -1,
+                        "ipv6_cidr_blocks": null,
+                        "prefix_list_ids": null,
+                        "self": null,
+                        "security_groups": null,
+                        "cidr_blocks": [
+                            "0.0.0.0/0"
+                        ]
+                    }
+                },
+                {
+                    "ingress": {
+                        "description": "ssh libera",
+                        "from_port": "22",
+                        "to_port": "22",
+                        "protocol": "tcp",
+                        "ipv6_cidr_blocks": null,
+                        "prefix_list_ids": null,
+                        "self": null,
+                        "security_groups": null,
+                        "cidr_blocks": [
+                            "0.0.0.0/0"
+                        ]
+                    }
                 }
             ]
         }
     },
     "sec_group_instances": {
         "vm1": {
-            "sec_names" : ["ssh-http"]
+            "sec_names": [
+                "ssh-http"
+            ]
         },
-        "vm2": 
-        {
-            "sec_names" : ["http"]
+        "vm2": {
+            "sec_names": [
+                "ssh-only"
+            ]
         }
     },
     "aws_user_name": "teste",
