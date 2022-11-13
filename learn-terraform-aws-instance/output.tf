@@ -5,7 +5,7 @@ output "password" {
 
 
 output "nome_instancia_region" {
-    value = [for key, value in aws_instance.app_server : "${key} - ${value.availability_zone}"]
+    value = [for key, value in aws_instance.app_server : "nome: ${key}| id: ${value.id} - ${value.availability_zone}"]
   
 }
 
@@ -14,11 +14,7 @@ output "instances" {
 }
 
 output "sec_group_name" {
-    value = aws_security_group.allow.name
-}
-
-output "sg_ingress_rules" {
-    value = var.sg_ingress_rules
+    value = [for key, value in aws_security_group.allow : [for rule in value.ingress: "nome: ${key} - description: ${rule.description} - from_port: ${rule.from_port} - to_port: ${rule.to_port} - protocol: ${rule.protocol} - cidr_blocks: ${rule.cidr_blocks[0]}"]]
 }
 
 

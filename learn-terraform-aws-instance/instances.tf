@@ -4,8 +4,7 @@ resource "aws_instance" "app_server" {
   instance_type =  each.value.instance_type  #var.aws_instance_type
   key_name = "livia"
   subnet_id = aws_subnet.main.id
-  # vpc_security_group_ids = [for sec_name in var.sec_group_nomes[each.key].sec_names : aws_security_group.allow[sec_name].id]
-  vpc_security_group_ids = [aws_security_group.allow.id]
+  vpc_security_group_ids = [for sec_name in var.sec_group_instances[each.key].sec_names : aws_security_group.allow[sec_name].id]
   tags = {
     Name = "IdGroup-${each.key}"
     Owner = "${var.aws_user_name}"

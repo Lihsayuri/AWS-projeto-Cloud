@@ -1,19 +1,11 @@
 
 resource "aws_security_group" "allow" {
-#   for_each = var.sec_group
-  name        = var.sec_group
-#   description = each.value.description
+  for_each = var.sec_groups
+  name        = each.value.name
   vpc_id      = aws_vpc.main.id
-    
-    ingress {
-        description = "All traffic"
-        from_port   = 0
-        to_port     = 0
-        protocol    = -1
-        cidr_blocks = ["0.0.0.0/0"]
-    } 
 
-
+    ingress = [for rule in each.value.ingress : rule.ingress]
+  
     egress {
         from_port   = 0
         to_port     = 0
@@ -29,18 +21,6 @@ resource "aws_security_group" "allow" {
 }
 
 
-resource aws_security_group_rule ingress {
-    type        = "ingress"
-    for_each = var.sg_ingress_rules
-    cidr_blocks = each.value.cidr_blocks
-    description = each.value.description
 
-    from_port = each.value.from_port
-    to_port   = each.value.to_port
-    protocol  = each.value.protocol
-
-    security_group_id = aws_security_group.allow.id
-
-}
 
 
