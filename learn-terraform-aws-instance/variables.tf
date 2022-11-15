@@ -42,6 +42,32 @@ variable "aws_user_name" {
   type        = string
   description = "Nome do usuário da AWS para ser usado no servidor."
 }
+
+variable "policy_name" {
+  type        = string
+  description = "Nome da política a ser atribuída ao usuário."
+}
+
+variable "policy_description" {
+  type        = string
+  description = "Descrição da política a ser atribuída ao usuário."
+} 
+
+
+variable "policy_action" {
+  type        = list(string)
+  description = "Ações da política a ser atribuída ao usuário."
+}
+
+variable "policy_resource" {
+  type        = string
+  description = "Recurso da política a ser atribuída ao usuário."
+}
+
+variable "policy_effect" {
+  type        = string
+  description = "Efeito da política a ser atribuída ao usuário."
+}
   
 variable "pgp_key" {
   default = <<EOF

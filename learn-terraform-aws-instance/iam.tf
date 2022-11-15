@@ -30,35 +30,149 @@ resource "aws_iam_user_group_membership" "add_user" {
     depends_on = [aws_iam_user.user]
 }
 
+
+resource "aws_iam_policy" "start_stop" {
+  name        = "StartStopInstances"
+  path        = "/"
+  description = "Permite user iniciar e parar instancias"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+        {
+            "Sid": "FirstStatement",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:StartInstances",
+                "ec2:StopInstances"
+            ],
+            "Resource": "arn:aws:ec2:*:116979769772:instance/*"
+        },
+        {
+            "Sid": "SecondStatement",
+            "Effect": "Allow",
+            "Action": "ec2:DescribeInstances",
+            "Resource": "*"
+        }
+    ]
+  })
+}
+
+
+resource "aws_iam_policy" "change_pass" {
+  name        = "ChangePassword"
+  path        = "/"
+  description = "Permite user trocar senha"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+        {
+            "Sid": "FirstStatement",
+            "Effect": "Allow",
+            "Action": "iam:ChangePassword",
+            "Resource": "arn:aws:iam::116979769772:user/*"
+        }
+    ]
+
+    
+  })
+}
+
+resource "aws_iam_policy" "niveis" {
+  name        = var.policy_name
+  path        = "/"
+  description = var.policy_description
+
+  policy = jsonencode({
+    "Version" = "2012-10-17"
+    "Statement" = [
+        {
+            "Effect" = var.policy_effect
+            "Action" = var.policy_action
+            "Resource" = var.policy_resource
+        }
+    ]
+})
+}
+
+
+
 resource "aws_iam_policy_attachment" "attach" {
     name       = "EC2StartStopOwnInstances"
     groups     = [aws_iam_group.group.name]
-    policy_arn = data.aws_iam_policy.StartI.arn
+    # policy_arn = data.aws_iam_policy.StartI.arn
+    policy_arn = aws_iam_policy.start_stop.arn
 
 }
 
 resource "aws_iam_policy_attachment" "attach2" {
     name       = "ChangePass"
     groups     = [aws_iam_group.group.name]
-    policy_arn = data.aws_iam_policy.ChangePass.arn
+    # policy_arn = data.aws_iam_policy.ChangePass.arn
+    policy_arn = aws_iam_policy.change_pass.arn
+
+}
+
+
+resource "aws_iam_policy_attachment" "attach3" {
+    name       = var.policy_name
+    groups     = [aws_iam_group.group.name]
+    # policy_arn = data.aws_iam_policy.ChangePass.arn
+    policy_arn = aws_iam_policy.niveis.arn
 
 }
 
 
 
+## POLÍTICAS EM NÍVEIS:
+
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Action": [
+#         "ec2:Describe*",
+#         "ec2:Get*",
+#         "ec2:Create*"
+#       ],
+#       "Effect": "Allow",
+#       "Resource": "*"
+#     }
+#   ]
+# }
+
+# {
+#     "Version" : "2012-10-17",
+#     "Statement" : [
+#       {
+#         "Action": [
+#           "ec2:Describe*",
+#           "ec2:Get*"
+#         ],
+#         "Effect": "Allow",
+#         "Resource": "*"
+#       }
+#     ]    
+#   }
 
 
 
-
-
-
-
-
-
-
-
-
-
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Action": [
+#         "ec2:Describe*",
+#         "ec2:Get*",
+#         "ec2:Create*",
+#         "ec2:Delete*"
+#       ],
+#       "Effect": "Allow",
+#       "Resource": "*"
+#     }
+#   ]
+# }
 
 
 # resource "aws_iam_user_policy" "user_ro" {
