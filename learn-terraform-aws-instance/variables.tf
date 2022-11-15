@@ -4,6 +4,11 @@ variable "aws_region" {
   description = "A região da AWS para fazer o deploy do servidor."
 }
 
+variable "vpc_cidr_block" {
+  type        = string
+  default     =  "10.0.0.0/16"
+}
+
 variable "virtual_machines" {
   description = "Informações sobre cada máquina a ser criada"
   type = map(object({

@@ -4,22 +4,28 @@ import boto3
 import json
 
 contador = 0
-dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}}
+dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : "",
+    "policy_name": "", "policy_description": "", "policy_action": [], "policy_effect": "", "policy_resource": ""}
 nome_instancias = []
 
 
 username = ""
 region = ""
+criou_user = False
+
+global documento
+
 
 def carrega_o_que_esta_no_json():
-    with open('.auto.tfvars.json', 'r') as json_file:
+    documento = f'.auto-{region}.tfvars.json'
+    with open(documento, 'r') as json_file:
         dict_variables = json.load(json_file)
-        print(dict_variables["sec_groups"]["ssh-http"])
     return dict_variables
 
 def escreve_documento(dict_variables):
+    documento = f'.auto-{region}.tfvars.json'
     json_object = json.dumps(dict_variables, indent = 4)
-    with open('.auto.tfvars.json', 'w') as outfile:
+    with open(documento, 'w') as outfile:
         outfile.write(json_object)
 
 def confere_resposta_nao_valida(resposta):
@@ -36,6 +42,58 @@ def confere_se_eh_numero(resposta):
     else:
         print("Você não digitou um número. Tente novamente" + "\n")
         return True
+
+
+def manual_uso():
+    print(""" 
+    
+    ===================================================================================================
+
+    Bem-vindo ao manual de uso da aplicação de criação de recursos na AWS.
+
+    ===================================================================================================
+
+    A aplicação foi desenvolvida para facilitar a criação de instâncias na AWS, com a possibilidade de criar
+    instâncias com diferentes configurações de segurança (grupos de segurança) que possuem diferentes regras.
+
+    Dessa forma, você poderá:
+    - Criar instâncias com nome, imagem da máquina, tipo de host.
+    - Criar grupos de segurança e associar a essas máquinas.
+    - Criar regras de segurança para os grupos de segurança.
+    - Criar um usuário com permissões de acesso a recursos da AWS.
+    - Listar os recursos criados, como instâncias, grupos de segurança e suas regras e usuários.
+    - Deletar instâncias, grupos de segurança, regras de grupo de segurança, e usuário (o que você criou).
+
+    Observação para esta aplicação : 
+    - Você deve ter instalado o Python 3.8.5 ou superior.
+    - Você deve ter instalado o Terraform 0.14.5 ou superior.
+    - Você deve ter instalado o AWS CLI 2.1.19 ou superior.
+    - Você deve ter instalado o Boto3 1.17.19 ou superior.
+    - Você deve ter instalado o JSON 2.0.9 ou superior.
+    - Você deve ter instalado o OS 1.0.1 ou superior.
+
+    Observações de uso da aplicação:
+    - Você deve ter uma conta na AWS.
+    - Você deve ter um usuário com permissões de acesso a recursos da AWS.
+    - Você deve colocar as credenciais do usuário no arquivo ~/.bashrc ou outro arquivo que carregue as variáveis de ambiente. Basta colocar as linhas abaixo no arquivo:
+        export AWS_ACCESS_KEY_ID = SUA_ACCESS_KEY_ID"
+        export AWS_SECRET_ACCESS_KEY = "SUA_SECRET_ACCESS_KEY"        
+        E rodar o comando: source ~/.bashrc ou outro dependendo do arquivo em que você colocou as variáveis de ambiente.
+
+    Observações sobre os manuseios dos recursos:
+    - Você não pode deletar completamente o security group de uma instância. Dessa forma, caso você escolha essa opção, serão apagadas todas as regras (exceto a padrão que já vem na própria criação de instância na AWS).
+    - As restrições que você irá aplicar ao usuário já são pré-definidas para facilitar a sua configuração.
+    - Mudanças só serão feitas se você selecionar a opção aplicar mudanças.
+    - Para acessar a senha do usuário e poder mexer no console da AWS vá para o documento file.txt criado, nele estará sua senha.
+        Mas antes de acessar o file, pergunte para quem criou o programa a senha para descriptografar o arquivo (ela será pedida na tela). 
+
+    EOF
+
+    """)
+
+    pronto = input("Digite qualquer tecla para continuar" + "\n")
+
+
 
 def criar_restricoes():
     print("Ok, vamos começar então" + "\n")
@@ -135,6 +193,8 @@ def criar_usuario():
         - Alterar senha;
     """)
 
+    criou_user = True
+
     criar_politicas = input("Você gostaria de criar outras restrições a esse usuário? (y/n)")
 
     while confere_resposta_nao_valida(criar_politicas):
@@ -150,10 +210,35 @@ def info_basicas():
     print("Então, pronto para começar a construir a infraestrutura? Vamos apenas começar com um detalhe importante..." + "\n")
 
 
+    global region
     region = input("Digite a região do projeto: ")
     print("\n")
 
+    vpc_cidr_block = input("Digite o CIDR Block da VPC (como referência dois exemplos: us-east-1 tem como default o 10.0.0.0/16  e a us-west-2 tem como default 172.16.0.0/16): ")
+
     dict_variables.update({str("aws_region") : str(region)})
+    dict_variables.update({str("vpc_cidr_block") : str(vpc_cidr_block)})
+    escreve_documento(dict_variables)
+
+def mudar_regiao():
+    print("Você escolheu mudar de região. Vamos então atualizar as seguintes informações:" + "\n")
+    global region 
+    region = input("Digite a região do projeto: ")
+    print("\n")
+
+    vpc_cidr_block = input("Digite o CIDR Block da VPC (como referência dois exemplos: us-east-1 tem como default o 10.0.0.0/16  e a us-west-2 tem como default 172.16.0.0/16): ")
+
+    global contador
+    global dict_variables
+    global nome_instancias
+    contador = 0
+    dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : "",
+    "policy_name": "", "policy_description": "", "policy_action": [], "policy_effect": "", "policy_resource": ""}
+    nome_instancias = []
+
+
+    dict_variables.update({str("aws_region") : str(region)})
+    dict_variables.update({str("vpc_cidr_block") : str(vpc_cidr_block)})
     escreve_documento(dict_variables)
 
 
@@ -278,6 +363,8 @@ def create_instances():
 
     while confere_se_eh_numero(qtd_instancias):
         qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
+
+    global contador
 
     for contador in range(int(qtd_instancias)):
         name_instance = input("""
@@ -493,59 +580,88 @@ def listar_recursos():
         print("Você escolheu listar usuários" )
         os.system("terraform output aws_iam_users")
 
+
+def aplicar_alteracoes():
+    global documento
+    documento = f'.auto-{region}.tfvars.json'
+
+    os.system("source ~/.bashrc")
+
+    os.system("terraform init")
+    os.system(f'terraform terraform plan -var-file={documento}')
+    os.system(f'terraform apply -var-file={documento}')
+
+    if criou_user:
+        os.system("terraform output password | base64 -d > test.txt")
+        os.system("gpg --decrypt test.txt > file.txt")
+
+
 def main():
 
     print("Olá caro usuário, seja bem vindo ao nosso projeto de automação de infraestrutura" + "\n")
+    global region
 
 
     primeira_resposta = input("""Primeiramente, você gostaria de :
     
-    1- Iniciar uma instância existente;
-    2- Parar uma instância existente;
-    3- Criar uma nova instância e security groups;
-    4- Destruir algum recurso;
+    0 - Manual de uso da aplicação; 
+    1 - Iniciar uma instância existente;
+    2 - Parar uma instância existente;
+    3 - Criar uma nova instância e security groups;
+    4 - Destruir algum recurso;
     5 - Listar recursos;
     6 - Criar um usuário; 
-    7 - Sair do programa
+    7 - Aplicar todas alterações feitas em uma região;
+    8 - Mudar a região onde você está trabalhando;
+    9 - Sair do programa
     
     R: """)
 
 
-    if primeira_resposta == "1":
+    if primeira_resposta == "0":
+        print("Você escolheu manual de uso da aplicação" + "\n")
+        manual_uso()
+        main()
+    elif primeira_resposta == "1":
         print("Você escolheu iniciar uma instância existente" + "\n")
         region = input("Digite a região da instância que você quer iniciar: ")
         lambda_handler_inicia(None, None, region)
+        main()
     elif primeira_resposta == "2":
         print("Você escolheu parar uma instância existente" + "\n")
         region = input("Digite a região da instância que você quer parar: ")
         lambda_handler_para(None, None, region)
+        main()
     elif primeira_resposta == "3":
         print("Você escolheu criar uma nova instância" + "\n")
-        
-        info_basicas()
-
-        # Cria o arquivo variables.tfvars
         create_instances()
-
-        # os.system("terraform init")
-        # os.system("source ~/.bashrc")
-        # os.system("terraform plan")
-        # os.system("terraform apply")
-
+        main()
     elif primeira_resposta == "4":
         print("Você escolheu destruir algum recurso" + "\n")
-        info_basicas()
+        if region == "":
+            info_basicas()
         destruir_recurso()
-
+        main()
     elif primeira_resposta == "5":
         print("Você escolheu listar recursos" + "\n")
+        if region == "":
+            info_basicas()
         listar_recursos()
+        main()
     elif primeira_resposta == "6":
         print("Você escolheu criar um usuário" + "\n")
-        info_basicas()
+        if region == "":
+            info_basicas()
         criar_usuario()
         main()
     elif primeira_resposta == "7":
+        print("Você escolheu aplicar todas alterações feitas nessa região {region}" + "\n")
+        aplicar_alteracoes()
+        main()
+    elif primeira_resposta == "8":
+        mudar_regiao()
+        main()
+    elif primeira_resposta == "9":
         print("Você escolheu sair do programa" + "\n")
         print("Obrigado por usar o nosso programa, volte sempre!" + "\n")
         return
@@ -566,7 +682,3 @@ main()
 # os.system("gpg --decrypt test.txt > file.txt")
 
 # region_global = "us-east-1"
-
-# lambda_handler_para(None, None, region = region_global)
-
-# lambda_handler(None, None, region = region_global)

@@ -20,17 +20,20 @@ provider "aws" {
    
 
 resource "aws_vpc" "main" {
-  cidr_block       = "10.0.0.0/16"
+  cidr_block       =    var.vpc_cidr_block        #"172.16.0.0/16"
   instance_tenancy = "default"
 
   tags = {
-    name = "VPC"
+    name = "VPC${var.aws_region}"
   }
 }
 
+# Subnet publica
 resource "aws_subnet" "main" {
   vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.1.0/24"
+  #cidr_block =  aws_vpc.main.cidr_block             #"172.16.1.0/24"
+  cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, 1)  # Pega o cidr do block da vpc e divide em 2
+  map_public_ip_on_launch = true
 
   tags = {
     Name = "Subnet"
