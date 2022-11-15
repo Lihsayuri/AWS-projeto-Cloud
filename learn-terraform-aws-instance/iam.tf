@@ -101,7 +101,6 @@ resource "aws_iam_policy" "niveis" {
 resource "aws_iam_policy_attachment" "attach" {
     name       = "EC2StartStopOwnInstances"
     groups     = [aws_iam_group.group.name]
-    # policy_arn = data.aws_iam_policy.StartI.arn
     policy_arn = aws_iam_policy.start_stop.arn
 
 }
@@ -109,7 +108,6 @@ resource "aws_iam_policy_attachment" "attach" {
 resource "aws_iam_policy_attachment" "attach2" {
     name       = "ChangePass"
     groups     = [aws_iam_group.group.name]
-    # policy_arn = data.aws_iam_policy.ChangePass.arn
     policy_arn = aws_iam_policy.change_pass.arn
 
 }
@@ -118,86 +116,7 @@ resource "aws_iam_policy_attachment" "attach2" {
 resource "aws_iam_policy_attachment" "attach3" {
     name       = var.policy_name
     groups     = [aws_iam_group.group.name]
-    # policy_arn = data.aws_iam_policy.ChangePass.arn
     policy_arn = aws_iam_policy.niveis.arn
 
 }
 
-
-
-## POLÍTICAS EM NÍVEIS:
-
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": [
-#         "ec2:Describe*",
-#         "ec2:Get*",
-#         "ec2:Create*"
-#       ],
-#       "Effect": "Allow",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-
-# {
-#     "Version" : "2012-10-17",
-#     "Statement" : [
-#       {
-#         "Action": [
-#           "ec2:Describe*",
-#           "ec2:Get*"
-#         ],
-#         "Effect": "Allow",
-#         "Resource": "*"
-#       }
-#     ]    
-#   }
-
-
-
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": [
-#         "ec2:Describe*",
-#         "ec2:Get*",
-#         "ec2:Create*",
-#         "ec2:Delete*"
-#       ],
-#       "Effect": "Allow",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-
-
-# resource "aws_iam_user_policy" "user_ro" {
-#   name = "test"
-#   user = aws_iam_user.user.name
-
-#   policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": [
-#         "ec2:Describe*",
-#         "ec2:Stop*",
-#         "ec2:Start*"
-#       ],
-#       "Effect": "Allow",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-# EOF
-# }
-
-# outputs for arn
-# output "user_arn" {
-#   value = "${aws_iam_user.user.arn}"
-# }

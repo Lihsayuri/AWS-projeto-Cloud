@@ -23,7 +23,4 @@ output "aws_iam_users" {
 }
   
 
-
-# encrypted_password
-
     
