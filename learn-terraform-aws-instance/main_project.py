@@ -38,18 +38,89 @@ def confere_se_eh_numero(resposta):
         return True
 
 def criar_restricoes():
-    qtd_policas = input("Quantas restrições você quer criar?")
+    print("Ok, vamos começar então" + "\n")
 
-    for i in range(int(qtd_policas)):
-        nome_policia = input("Digite o nome da restrição: ")
-        print("\n")
-        aws_action = input("Digite a ação que você quer restringir: ")
-        print("\n")
-        aws_resource = input("Digite o recurso que você quer restringir: ")
-        print("\n")
 
-        dict_variables["policies"].update({str(nome_policia) : {  "action" : str(aws_action), \
-                                                                "resource" : str(aws_resource)}})
+    list_describe = {
+            "Action": [
+            "ec2:Describe*",
+            "ec2:Get*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        }
+
+
+    list_describe_create =  {
+        "Action": [
+            "ec2:Describe*",
+            "ec2:Get*",
+            "ec2:Create*",
+            "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+            "ec2:ModifySecurityGroupRules",
+            "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+            "ec2:AuthorizeSecurityGroupIngress", 
+            "ec2:RevokeSecurityGroupIngress", 
+            "ec2:AuthorizeSecurityGroupEgress", 
+            "ec2:RevokeSecurityGroupEgress",
+            "ec2:RunInstances"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+        }
+
+    list_describe_create_delete = {
+        "Action": [
+            "ec2:Describe*",
+            "ec2:Get*",
+            "ec2:Create*",
+            "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+            "ec2:ModifySecurityGroupRules",
+            "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+            "ec2:AuthorizeSecurityGroupIngress", 
+            "ec2:RevokeSecurityGroupIngress", 
+            "ec2:AuthorizeSecurityGroupEgress", 
+            "ec2:RevokeSecurityGroupEgress",
+            "ec2:RunInstances",
+            "ec2:TerminateInstances",
+            "ec2:Delete*"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+        }
+
+    opcoes = input("""Você pode escolher entre as seguintes opções:
+
+    1-  Descrever e listar recursos;
+    2 - Descrever, listar e criar recursos;
+    3 - Descrever, listar, criar e destruir recursos.
+
+    Digite o número da opção que você deseja: """)   
+
+    while confere_se_eh_numero(opcoes):
+        opcoes = input("Digite o número da opção que você deseja: ")
+
+    if opcoes == "1":
+        dict_variables.update({"policy_name" : str("ReadOnlyAccess")})
+        dict_variables.update({"policy_description" : str("Descrever e listar recursos")})
+        dict_variables.update({"policy_action": list_describe["Action"]})
+        dict_variables.update({"policy_effect": list_describe["Effect"]})
+        dict_variables.update({"policy_resource": list_describe["Resource"]})
+        escreve_documento(dict_variables)
+    elif opcoes == "2":
+        dict_variables.update({"policy_name" : str("ReadWriteAccess")})
+        dict_variables.update({"policy_description" : str("Descrever, listar e criar recursos")})
+        dict_variables.update({"policy_action": list_describe_create["Action"]})
+        dict_variables.update({"policy_effect": list_describe_create["Effect"]})
+        dict_variables.update({"policy_resource": list_describe_create["Resource"]})
+        escreve_documento(dict_variables)
+    elif opcoes == "3":
+        dict_variables.update({"policy_name" : str("FullAccess")})
+        dict_variables.update({"policy_description" : str("Descrever, listar, criar e destruir recursos")})
+        dict_variables.update({"policy_action": list_describe_create_delete["Action"]})
+        dict_variables.update({"policy_effect": list_describe_create_delete["Effect"]})
+        dict_variables.update({"policy_resource": list_describe_create_delete["Resource"]})
+        escreve_documento(dict_variables)
 
 def criar_usuario():
     print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
@@ -64,10 +135,10 @@ def criar_usuario():
         - Alterar senha;
     """)
 
-    criar_politicas = input("Você gostaria de criar restrições a esse usuário? (y/n)")
+    criar_politicas = input("Você gostaria de criar outras restrições a esse usuário? (y/n)")
 
     while confere_resposta_nao_valida(criar_politicas):
-        criar_politicas = input("Você gostaria de criar restrições a esse usuário? (y/n)")
+        criar_politicas = input("Você gostaria de criar outras restrições a esse usuário? (y/n)")
 
     if criar_politicas == "y" or criar_politicas == "Y":
         criar_restricoes()
@@ -76,16 +147,9 @@ def criar_usuario():
 
 
 def info_basicas():
-    print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
-    username = input("Digite o seu nome de usuário: ")
-    print("\n")
-
-    dict_variables.update({str("aws_user_name") : str(username)})
-    escreve_documento(dict_variables)
+    print("Então, pronto para começar a construir a infraestrutura? Vamos apenas começar com um detalhe importante..." + "\n")
 
 
-
-    print("Agora vamos para detalhes da AWS" + "\n")
     region = input("Digite a região do projeto: ")
     print("\n")
 
@@ -441,11 +505,10 @@ def main():
     3- Criar uma nova instância e security groups;
     4- Destruir algum recurso;
     5 - Listar recursos;
-    6 - Criar um usuário 
+    6 - Criar um usuário; 
+    7 - Sair do programa
     
     R: """)
-
-    # info_basicas()
 
 
     if primeira_resposta == "1":
@@ -458,6 +521,8 @@ def main():
         lambda_handler_para(None, None, region)
     elif primeira_resposta == "3":
         print("Você escolheu criar uma nova instância" + "\n")
+        
+        info_basicas()
 
         # Cria o arquivo variables.tfvars
         create_instances()
@@ -469,20 +534,28 @@ def main():
 
     elif primeira_resposta == "4":
         print("Você escolheu destruir algum recurso" + "\n")
+        info_basicas()
         destruir_recurso()
+
     elif primeira_resposta == "5":
         print("Você escolheu listar recursos" + "\n")
         listar_recursos()
     elif primeira_resposta == "6":
         print("Você escolheu criar um usuário" + "\n")
+        info_basicas()
         criar_usuario()
+        main()
+    elif primeira_resposta == "7":
+        print("Você escolheu sair do programa" + "\n")
+        print("Obrigado por usar o nosso programa, volte sempre!" + "\n")
+        return
 
 
 
 
 # Executa a função main
 main()
-# destruir_recurso()
+# criar_usuario()
 
 
 

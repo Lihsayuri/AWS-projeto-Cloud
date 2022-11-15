@@ -30,7 +30,7 @@ data "aws_instances" "instances" {
 #             "Resource": "arn:aws:ec2:*:116979769772:instance/*"
 #         },
 #         {
-#             "Sid": "VisualEditor1",
+#             "Sid": "FirstStatement",
 #             "Effect": "Allow",
 #             "Action": "ec2:DescribeInstances",
 #             "Resource": "*"
@@ -45,7 +45,7 @@ data "aws_instances" "instances" {
 #     "Version": "2012-10-17",
 #     "Statement": [
 #         {
-#             "Sid": "VisualEditor0",
+#             "Sid": "FirstStatement",
 #             "Effect": "Allow",
 #             "Action": "iam:ChangePassword",
 #             "Resource": "arn:aws:iam::116979769772:user/*"
