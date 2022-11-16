@@ -4,14 +4,15 @@ import boto3
 import json
 
 contador = 0
-dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : "",
+dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : [],
     "policy_name": "", "policy_description": "", "policy_action": [], "policy_effect": "", "policy_resource": ""}
 nome_instancias = []
 
+# O QUE FAZER: MUDAR REGIAO E VER SE JA EXISTEM INFOS NO JSON;
+# DEPOIS MUDAR O LIST TBM, PORQUE VAI DEPENDER DA REGIAO NÉ AMADA
 
 username = ""
 region = ""
-criou_user = False
 
 global documento
 
@@ -147,7 +148,7 @@ def criar_restricoes():
         "Resource": "*"
         }
 
-    opcoes = input("""Você pode escolher entre as seguintes opções:
+    opcoes = input("""Para facilitar sua vida, você pode escolher entre as seguintes opções:
 
     1-  Descrever e listar recursos;
     2 - Descrever, listar e criar recursos;
@@ -159,50 +160,40 @@ def criar_restricoes():
         opcoes = input("Digite o número da opção que você deseja: ")
 
     if opcoes == "1":
-        dict_variables.update({"policy_name" : str("ReadOnlyAccess")})
-        dict_variables.update({"policy_description" : str("Descrever e listar recursos")})
-        dict_variables.update({"policy_action": list_describe["Action"]})
-        dict_variables.update({"policy_effect": list_describe["Effect"]})
-        dict_variables.update({"policy_resource": list_describe["Resource"]})
+        dict_variables["aws_user_name"].append({"username" : username, "policy_name": "ReadOnlyAccess_" + username, "policy_description": "Descrever e listar recursos", 
+            "policy_action": list_describe["Action"], "policy_resource": list_describe["Resource"], "policy_effect": list_describe["Effect"]})
         escreve_documento(dict_variables)
     elif opcoes == "2":
-        dict_variables.update({"policy_name" : str("ReadWriteAccess")})
-        dict_variables.update({"policy_description" : str("Descrever, listar e criar recursos")})
-        dict_variables.update({"policy_action": list_describe_create["Action"]})
-        dict_variables.update({"policy_effect": list_describe_create["Effect"]})
-        dict_variables.update({"policy_resource": list_describe_create["Resource"]})
+        dict_variables["aws_user_name"].append({"username" : username, "policy_name": "ReadWriteAccess_" + username, "policy_description": "Descrever, listar e criar recursos", 
+            "policy_action": list_describe_create["Action"], "policy_resource": list_describe_create["Resource"], "policy_effect": list_describe_create["Effect"] })
         escreve_documento(dict_variables)
     elif opcoes == "3":
-        dict_variables.update({"policy_name" : str("FullAccess")})
-        dict_variables.update({"policy_description" : str("Descrever, listar, criar e destruir recursos")})
-        dict_variables.update({"policy_action": list_describe_create_delete["Action"]})
-        dict_variables.update({"policy_effect": list_describe_create_delete["Effect"]})
-        dict_variables.update({"policy_resource": list_describe_create_delete["Resource"]})
+        dict_variables["aws_user_name"].append({"username" : username, "policy_name": "ReadWriteDeleteAccess_" + username, "policy_description": "Descrever, listar, criar e destruir recursos", 
+            "policy_action": list_describe_create_delete["Action"], "policy_resource": list_describe_create_delete["Resource"], "policy_effect": list_describe_create_delete["Effect"] })
         escreve_documento(dict_variables)
 
 def criar_usuario():
     print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
+    global username
     username = input("Digite o seu nome de usuário: ")
     print("\n")
 
-    dict_variables.update({str("aws_user_name") : str(username)})
-    escreve_documento(dict_variables)
 
     print("""Esse usuário criado já vem com as seguintes permissões: 
         - Criar e parar instâncias;
         - Alterar senha;
     """)
 
-    criou_user = True
 
-    criar_politicas = input("Você gostaria de criar outras restrições a esse usuário? (y/n)")
+    criar_politicas = input("Você gostaria de criar restrições a esse usuário? (y/n)")
 
     while confere_resposta_nao_valida(criar_politicas):
-        criar_politicas = input("Você gostaria de criar outras restrições a esse usuário? (y/n)")
+        criar_politicas = input("Você gostaria de criar restrições a esse usuário? (y/n) Se resposta for n, ele terá todas as permissões.")
 
     if criar_politicas == "y" or criar_politicas == "Y":
         criar_restricoes()
     elif criar_politicas == "n" or criar_politicas == "N":
+        dict_variables["aws_user_name"].append({"username": username, "policy_name": "FullAccess", "policy_description": "Usuario possui acesso a tudo", "policy_action": ["*"], "policy_resource": "*", "policy_effect": "Allow"})
         print("Ok, vamos continuar então" + "\n")
 
 
@@ -507,18 +498,22 @@ def destruir_recurso():
         user_destruir = input("""Você escolheu destruir um usuário. 
         Digite o nome do usuário que você quer destruir: """)
 
-        destruir_yes_no = input("""Você está prestes a destruir o usuário {user_destruir} 
-        
-        Você tem certeza que quer destruir o usuário? (y/n) 
-        R: """)
+        # confere se o user_destruir está no dict_variables["aws_user_name" FAZER
+
+        destruir_yes_no = input(f'Você está prestes a destruir o usuário {user_destruir}. Você tem certeza que quer destruir o usuário? (y/n). \n R: ')
 
         while confere_resposta_nao_valida(destruir_yes_no):
             destruir_yes_no = input("Você tem certeza que quer destruir o usuário? (y/n)")
 
         if destruir_yes_no == "y" or "Y":
             print("Ok, destruindo o usuário" + "\n")
-            dict_variables.pop("aws_user_name")
-            escreve_documento(dict_variables)
+            size = len(dict_variables["aws_user_name"])
+            for i in range(size):
+                if dict_variables["aws_user_name"][i]["username"] == user_destruir:
+                    dict_variables["aws_user_name"].pop(i)
+                    size = size - 1
+                    escreve_documento(dict_variables)
+
         elif destruir_yes_no == "n" or "N":
             print("Ok, então não destruiremos o usuário" + "\n")
 
@@ -559,6 +554,7 @@ def destruir_recurso():
 def listar_recursos():
     print("Mas antes vamos garantir que o programa está atualizado... Aguarde um momento")
 
+    # VAI TER Q MODIFICAR ISSO AQUI
     refresh = os.popen("terraform refresh").read()
 
     escolha_listar = input("""Você quer listar:
@@ -591,15 +587,13 @@ def aplicar_alteracoes():
     os.system(f'terraform terraform plan -var-file={documento}')
     os.system(f'terraform apply -var-file={documento}')
 
-    if criou_user:
-        os.system("terraform output password | base64 -d > test.txt")
-        os.system("gpg --decrypt test.txt > file.txt")
-
 
 def main():
 
     print("Olá caro usuário, seja bem vindo ao nosso projeto de automação de infraestrutura" + "\n")
     global region
+
+    region = "us-east-1"
 
 
     primeira_resposta = input("""Primeiramente, você gostaria de :

@@ -1,6 +1,6 @@
 output "password" {
 //    sensitive = true
-    value     = aws_iam_user_login_profile.profile.encrypted_password
+    value = values({ for user_test, profile in aws_iam_user_login_profile.profile : user_test => profile})
 }
 
 

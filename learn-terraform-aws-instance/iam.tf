@@ -5,7 +5,9 @@ resource "aws_iam_group" "group" {
 }
 
 resource "aws_iam_user" "user" {
-  name = var.aws_user_name
+  for_each = {for user in var.aws_user_name : user.username => user}
+  # for_each = var.aws_user_name
+  name = each.value.username
   # path = "/system/"
 
   tags = {
@@ -14,18 +16,24 @@ resource "aws_iam_user" "user" {
 }
 
 resource "aws_iam_access_key" "user" {
-  user = aws_iam_user.user.name
+  for_each = {for user in var.aws_user_name : user.username => user}
+  # for_each = var.aws_user_name
+  user = aws_iam_user.user[each.value.username].name
 }
 
 resource "aws_iam_user_login_profile" "profile" {
-  user                    =  aws_iam_user.user.name
-  pgp_key                 =  var.pgp_key
+  for_each               = {for user in var.aws_user_name: user.username => user}
+  # for_each = var.aws_user_name
+  user                    =  aws_iam_user.user[each.value.username].name
+  # pgp_key                 =  var.pgp_key
   password_reset_required =  true
-  password_length         =  10  
+  password_length         =  10   
 }
 
 resource "aws_iam_user_group_membership" "add_user" {
-    user         =  aws_iam_user.user.name                           
+    for_each = {for user in var.aws_user_name: user.username => user}
+    # for_each = var.aws_user_name
+    user         =  each.value.username                          
     groups = [aws_iam_group.group.name]
     depends_on = [aws_iam_user.user]
 }
@@ -80,17 +88,19 @@ resource "aws_iam_policy" "change_pass" {
 }
 
 resource "aws_iam_policy" "niveis" {
-  name        = var.policy_name
+  for_each = {for user in var.aws_user_name: user.username => user}
+  # for_each = var.aws_user_name
+  name        = each.value.policy_name
   path        = "/"
-  description = var.policy_description
+  description = each.value.policy_description
 
   policy = jsonencode({
     "Version" = "2012-10-17"
     "Statement" = [
         {
-            "Effect" = var.policy_effect
-            "Action" = var.policy_action
-            "Resource" = var.policy_resource
+            "Effect" = each.value.policy_effect
+            "Action" = each.value.policy_action
+            "Resource" = each.value.policy_resource
         }
     ]
 })
@@ -113,10 +123,10 @@ resource "aws_iam_policy_attachment" "attach2" {
 }
 
 
-resource "aws_iam_policy_attachment" "attach3" {
-    name       = var.policy_name
-    groups     = [aws_iam_group.group.name]
-    policy_arn = aws_iam_policy.niveis.arn
+resource "aws_iam_user_policy_attachment" "user_policy_attachment" {
+    for_each = {for user in var.aws_user_name: user.username => user}
+    # for_each = var.aws_user_name
+    user       = aws_iam_user.user[each.value.username].name
+    policy_arn =  aws_iam_policy.niveis[each.value.username].arn
 
 }
-

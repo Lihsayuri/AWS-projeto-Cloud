@@ -13,7 +13,12 @@ documento = f'.auto-{region}.tfvars.json'
 
 print(documento)
 
-dict_variables = {"teste" : "teste"}
+# colocar o nome da regiao ao lado do valor teste do dicionario
+dict_variables = {
+    "teste": region
+}
+
+dict_variables = {"teste" : "teste" + region}
 
 def escreve_documento(dict_variables):
     json_object = json.dumps(dict_variables, indent = 4)
