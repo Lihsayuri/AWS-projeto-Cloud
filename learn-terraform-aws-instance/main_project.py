@@ -5,11 +5,7 @@ import json
 
 dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : []}
 nome_instancias = []
-usuarios = []
-
-# O QUE FAZER: MUDAR REGIAO E VER SE JA EXISTEM INFOS NO JSON;
-# DEPOIS MUDAR O LIST TBM, PORQUE VAI DEPENDER DA REGIAO NÉ AMADA
-
+roda_unica_vez = True
 username = ""
 region = ""
 
@@ -17,13 +13,13 @@ global documento
 
 
 def carrega_o_que_esta_no_json():
-    documento = f'.auto-{region}.tfvars.json'
+    documento = f'terraform-{region}/.auto-{region}.tfvars.json'
     with open(documento, 'r') as json_file:
         dict_variables = json.load(json_file)
     return dict_variables
 
 def escreve_documento(dict_variables):
-    documento = f'.auto-{region}.tfvars.json'
+    documento = f'terraform-{region}/.auto-{region}.tfvars.json'
     json_object = json.dumps(dict_variables, indent = 4)
     with open(documento, 'w') as outfile:
         outfile.write(json_object)
@@ -96,6 +92,9 @@ def manual_uso():
 
 
 def criar_restricoes():
+    global documento
+    documento = f'terraform-{region}/.auto-{region}.tfvars.json'
+
     print("Ok, vamos começar então" + "\n")
 
     list_describe = {
@@ -192,7 +191,8 @@ def criar_usuario():
     if criar_politicas == "y" or criar_politicas == "Y":
         criar_restricoes()
     elif criar_politicas == "n" or criar_politicas == "N":
-        dict_variables["aws_user_name"].append({"username": username, "policy_name": "FullAccess", "policy_description": "Usuario possui acesso a tudo", "policy_action": ["*"], "policy_resource": "*", "policy_effect": "Allow"})
+        dict_variables["aws_user_name"].append({"username": username, "policy_name": "FullAccess_" + username, "policy_description": "Usuario possui acesso a tudo", "policy_action": ["*"], "policy_resource": "*", "policy_effect": "Allow"})
+        escreve_documento(dict_variables)
         print("Ok, vamos continuar então" + "\n")
 
 
@@ -204,20 +204,35 @@ def info_basicas():
 
     print("Então, pronto para começar a construir a infraestrutura? Vamos apenas começar com um detalhe importante..." + "\n")
 
-    region = input("Digite a região do projeto (dois exemplos são a us-east-1 e a us-west-2): ")
+    resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
     print("\n")
 
-    vpc_cidr_block = input("Digite o CIDR Block da VPC (como referência dois exemplos: us-east-1 tem como default o 10.0.0.0/16  e a us-west-2 tem como default 172.16.0.0/16): ")
+    while True:
+        if resposta == "1" or resposta == "2":
+            break
+        else:
+            resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
 
-    documento = f'.auto-{region}.tfvars.json'
+
+    if resposta == "1":
+        region = "us-east-1"
+    elif resposta == "2":
+        region = "us-west-1"
+
+    if region == "us-east-1":
+        vpc_cidr_block = "10.0.0.0/16"
+    else:
+        vpc_cidr_block = "172.16.0.0/16" 
+
+
+    documento = f'terraform-{region}/.auto-{region}.tfvars.json'
 
 
     if os.path.exists(documento):
         dict_variables = carrega_o_que_esta_no_json()
         nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
     else:
-        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : "",
-        "policy_name": "", "policy_description": "", "policy_action": [], "policy_effect": "", "policy_resource": ""}
+        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : []}
         nome_instancias = []
 
 
@@ -227,7 +242,6 @@ def info_basicas():
 
 
 def mantem_usuario_regioes(dict_antigo):
-    global usuarios
     global dict_variables
 
     print(dict_antigo["aws_user_name"])
@@ -236,46 +250,56 @@ def mantem_usuario_regioes(dict_antigo):
         print("Vazio")
         return dict_antigo
     for i in range(len(dict_antigo["aws_user_name"])):
-        usuarios.append(dict_antigo["aws_user_name"][i])
-        dict_variables["aws_user_name"].append(dict_antigo["aws_user_name"][i])
+        if dict_antigo["aws_user_name"][i] not in dict_variables["aws_user_name"]:
+            dict_variables["aws_user_name"].append(dict_antigo["aws_user_name"][i])
         print("ENTREI AQUI NO USERS")
-        # print("USUARIOS: ", usuarios)
 
 def mudar_regiao():
     global region 
     global dict_variables
     global nome_instancias
     global documento
-    global usuarios
 
     print("Você escolheu mudar de região. Vamos então atualizar as seguintes informações:" + "\n")
-    region = input("Digite a região do projeto (dois exemplos são a us-east-1 e a us-west-2): ")
+    resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
     print("\n")
 
-    vpc_cidr_block = input("Digite o CIDR Block da VPC (como referência dois exemplos: us-east-1 tem como default o 10.0.0.0/16  e a us-west-2 tem como default 172.16.0.0/16): ")
+    while True:
+        if resposta == "1" or resposta == "2":
+            break
+        else:
+            resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
 
-    usuarios = [user for user in dict_variables["aws_user_name"]]
-    # print("USUARIOS: ", usuarios)
 
-    documento = f'.auto-{region}.tfvars.json'
+    if resposta == "1":
+        region = "us-east-1"
+    elif resposta == "2":
+        region = "us-west-1"
+
+    if region == "us-east-1":
+        vpc_cidr_block = "10.0.0.0/16"
+    else:
+        vpc_cidr_block = "172.16.0.0/16" 
+
+    documento = f'terraform-{region}/.auto-{region}.tfvars.json'
 
     dict_antigo = dict_variables
 
     if os.path.exists(documento):
         dict_variables = carrega_o_que_esta_no_json()
-        nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
+        # nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
 
-        mantem_usuario_regioes(dict_antigo)
+        # mantem_usuario_regioes(dict_antigo)
     else:
         dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : [], "aws_user_name" : []}
-        mantem_usuario_regioes(dict_antigo)
-        print("ENTREI AQUIIIIII")
+        # mantem_usuario_regioes(dict_antigo)
         nome_instancias = []
 
 
     dict_variables.update({str("aws_region") : str(region)})
     dict_variables.update({str("vpc_cidr_block") : str(vpc_cidr_block)})
     escreve_documento(dict_variables)
+
 
 
 def cria_sec_group():
@@ -387,13 +411,19 @@ def cria_sec_group_padrao():
 
 
     for i in range(len(nome_instancias)):
-
         dict_variables["sec_group_instances"].update({str(nome_instancias[i]) : {"sec_names" : ["standard"]}})
         escreve_documento(dict_variables)
 
 
 
+
 def create_instances():
+    global region
+    global roda_unica_vez
+
+    if roda_unica_vez:
+        cria_sec_group_padrao()
+        roda_unica_vez = False
 
     qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
 
@@ -409,11 +439,21 @@ def create_instances():
         
         nome_instancias.append(name_instance)
 
-        image_id = input("""
+        image_id_resposta = input("""
         
-        Digite o id da imagem a ser utilizada no servidor: 
+        Qual imagem você quer utilizar na instância? [1 - Ubuntu Server 20.04 LTS ou 2 - Ubuntu Server 22.04 LTS]
         
         R: """)
+
+        if image_id_resposta == "1" and region == "us-east-1":
+            image_id = "ami-0149b2da6ceec4bb0"
+        elif image_id_resposta == "2" and region == "us-east-1":
+            image_id = "ami-08c40ec9ead489470"
+        elif image_id_resposta == "1" and region == "us-west-1":
+            image_id = "ami-03f6d497fceb40069"
+        elif image_id_resposta == "2" and region == "us-west-1":
+            image_id = "ami-017fecd1353bcc96e"
+        
         
         while True:
             instance_type_choice = input("""
@@ -491,11 +531,7 @@ def destruir_recurso():
 
         inst_selecionada = dict_variables["virtual_machines"][instancia_destruir]
 
-        destruir_yes_no = input(""" "Você está prestes a destruir a instância {instancia_destruir}: 
-        
-        {inst_selecionada} "\n"
-        
-        Você tem certeza que quer destruir a instância? (y/n) """)
+        destruir_yes_no = input(f'Você está prestes a destruir a instância {instancia_destruir}: {inst_selecionada} \n .Você tem certeza que quer destruir a instância? (y/n)')
 
         while confere_resposta_nao_valida(destruir_yes_no):
             destruir_yes_no = input("Você tem certeza que quer destruir a instância? (y/n)")
@@ -503,6 +539,9 @@ def destruir_recurso():
         if destruir_yes_no == "y" or "Y":
             print("Ok, destruindo a instância" + "\n")
             dict_variables["virtual_machines"].pop(str(instancia_destruir))
+            for chave in dict_variables["sec_group_instances"].copy():
+                if instancia_destruir == chave:
+                    del dict_variables["sec_group_instances"][str(instancia_destruir)]
 
             # Se destruir instÂncia, destroi os security groups também?
             escreve_documento(dict_variables)
@@ -646,9 +685,13 @@ def aplicar_alteracoes():
 
     os.system("source ~/.bashrc")
 
-    os.system("terraform init")
-    os.system(f'terraform terraform plan -var-file={documento}')
-    os.system(f'terraform apply -var-file={documento}')
+    os.system(f'cd terraform-{region} && terraform init && terraform  plan -var-file={documento} && terraform apply -var-file={documento}')
+
+    # os.system("terraform init")
+    # os.system(f'terraform terraform plan -var-file={documento}')
+    # os.system(f'terraform apply -var-file={documento}')
+
+    # os.system("cd ..")
 
 
 def main():

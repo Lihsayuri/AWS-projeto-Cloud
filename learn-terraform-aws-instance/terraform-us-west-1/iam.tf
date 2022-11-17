@@ -1,0 +1,132 @@
+
+resource "aws_iam_group" "group" {
+    name       = "Alunos"
+    path       = "/users/"  
+}
+
+resource "aws_iam_user" "user" {
+  for_each = {for user in var.aws_user_name : user.username => user}
+  # for_each = var.aws_user_name
+  name = each.value.username
+  # path = "/system/"
+
+  tags = {
+    tag-key = "created-user"
+  }
+}
+
+resource "aws_iam_access_key" "user" {
+  for_each = {for user in var.aws_user_name : user.username => user}
+  # for_each = var.aws_user_name
+  user = aws_iam_user.user[each.value.username].name
+}
+
+resource "aws_iam_user_login_profile" "profile" {
+  for_each               = {for user in var.aws_user_name: user.username => user}
+  # for_each = var.aws_user_name
+  user                    =  aws_iam_user.user[each.value.username].name
+  # pgp_key                 =  var.pgp_key
+  password_reset_required =  true
+  password_length         =  10   
+}
+
+resource "aws_iam_user_group_membership" "add_user" {
+    for_each = {for user in var.aws_user_name: user.username => user}
+    # for_each = var.aws_user_name
+    user         =  each.value.username                          
+    groups = [aws_iam_group.group.name]
+    depends_on = [aws_iam_user.user]
+}
+
+
+resource "aws_iam_policy" "start_stop" {
+  name        = "StartStopInstances"
+  path        = "/"
+  description = "Permite user iniciar e parar instancias"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+        {
+            "Sid": "FirstStatement",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:StartInstances",
+                "ec2:StopInstances"
+            ],
+            "Resource": "arn:aws:ec2:*:116979769772:instance/*"
+        },
+        {
+            "Sid": "SecondStatement",
+            "Effect": "Allow",
+            "Action": "ec2:DescribeInstances",
+            "Resource": "*"
+        }
+    ]
+  })
+}
+
+
+resource "aws_iam_policy" "change_pass" {
+  name        = "ChangePassword"
+  path        = "/"
+  description = "Permite user trocar senha"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+        {
+            "Sid": "FirstStatement",
+            "Effect": "Allow",
+            "Action": "iam:ChangePassword",
+            "Resource": "arn:aws:iam::116979769772:user/*"
+        }
+    ]
+
+    
+  })
+}
+
+resource "aws_iam_policy" "niveis" {
+  for_each = {for user in var.aws_user_name: user.username => user}
+  # for_each = var.aws_user_name
+  name        = each.value.policy_name
+  path        = "/"
+  description = each.value.policy_description
+
+  policy = jsonencode({
+    "Version" = "2012-10-17"
+    "Statement" = [
+        {
+            "Effect" = each.value.policy_effect
+            "Action" = each.value.policy_action
+            "Resource" = each.value.policy_resource
+        }
+    ]
+})
+}
+
+
+
+resource "aws_iam_policy_attachment" "attach" {
+    name       = "EC2StartStopOwnInstances"
+    groups     = [aws_iam_group.group.name]
+    policy_arn = aws_iam_policy.start_stop.arn
+
+}
+
+resource "aws_iam_policy_attachment" "attach2" {
+    name       = "ChangePass"
+    groups     = [aws_iam_group.group.name]
+    policy_arn = aws_iam_policy.change_pass.arn
+
+}
+
+
+resource "aws_iam_user_policy_attachment" "user_policy_attachment" {
+    for_each = {for user in var.aws_user_name: user.username => user}
+    # for_each = var.aws_user_name
+    user       = aws_iam_user.user[each.value.username].name
+    policy_arn =  aws_iam_policy.niveis[each.value.username].arn
+
+}
