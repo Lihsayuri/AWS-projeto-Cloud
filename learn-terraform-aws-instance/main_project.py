@@ -221,8 +221,6 @@ def info_basicas():
         nome_instancias = []
 
 
-    dict_variables = carrega_o_que_esta_no_json()
-
     dict_variables.update({str("aws_region") : str(region)})
     dict_variables.update({str("vpc_cidr_block") : str(vpc_cidr_block)})
     escreve_documento(dict_variables)
@@ -232,11 +230,15 @@ def mantem_usuario_regioes(dict_antigo):
     global usuarios
     global dict_variables
 
-    if dict_antigo["aws_user_name"] != []:
-        for user in dict_antigo["aws_user_name"]:
-            usuarios.append(user)
-        dict_variables["aws_user_name"].append(usuarios)
-        usuarios = [user for user in dict_variables["aws_user_name"]]
+    print(dict_antigo["aws_user_name"])
+
+    if dict_antigo["aws_user_name"] == []:
+        print("Vazio")
+        return dict_antigo
+    for i in range(len(dict_antigo["aws_user_name"])):
+        usuarios.append(dict_antigo["aws_user_name"][i])
+        dict_variables["aws_user_name"].append(dict_antigo["aws_user_name"][i])
+        print("ENTREI AQUI NO USERS")
         # print("USUARIOS: ", usuarios)
 
 def mudar_regiao():
@@ -265,8 +267,9 @@ def mudar_regiao():
 
         mantem_usuario_regioes(dict_antigo)
     else:
-        {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : []}
+        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : [], "aws_user_name" : []}
         mantem_usuario_regioes(dict_antigo)
+        print("ENTREI AQUIIIIII")
         nome_instancias = []
 
 
@@ -593,9 +596,13 @@ def destruir_recurso():
 
 def listar_recursos():
     print("Mas antes vamos garantir que o programa está atualizado... Aguarde um momento")
+    global region
 
-    # VAI TER Q MODIFICAR ISSO AQUI
-    refresh = os.popen("terraform refresh").read()
+    session = boto3.Session(profile_name='default', region_name=region)
+    ec2client = session.client('ec2')
+    ec2iam = session.client('iam')
+    ec2re = session.resource('ec2')
+
 
     escolha_listar = input("""Você quer listar:
     1- Instâncias e suas regiões;
@@ -607,15 +614,31 @@ def listar_recursos():
 
     if escolha_listar == "1":
         print("Você escolheu listar instâncias e suas regiões" + "\n")
-        os.system("terraform output nome_instancia_region")
-        os.system("terraform output instances")
+
+        for each in ec2re.instances.all():
+            print("Id: " + each.id + " " + "| Nome: " + each.tags[0]["Value"] + " " + "| Estado: " + each.state["Name"] + " " +
+            "| Tipo: " + each.instance_type +  "| Região: "+  each.placement['AvailabilityZone'] + "\n")
+
+
     elif escolha_listar == "2":
         print("Você escolheu listar grupos de segurança e suas regras" )
-        os.system("terraform output sec_group_name")
+        for each in ec2re.security_groups.all():
+            print("Nome: " + each.group_name + "\n")
+            for rule in each.ip_permissions:
+                print("Regra: " + str(rule) + "\n")
+                print("=================================================================================================")
+         
+
     elif escolha_listar == "3":
         print("Você escolheu listar usuários" )
-        os.system("terraform output aws_iam_users")
-
+        for user in ec2iam.list_users()['Users']:
+            print("Usuário: {0}\ID: {1}\nARN: {2}\Criado em: {3}\n".format(
+                user['UserName'],
+                user['UserId'],
+                user['Arn'],
+                user['CreateDate']
+                )
+            )
 
 def aplicar_alteracoes():
     global documento
