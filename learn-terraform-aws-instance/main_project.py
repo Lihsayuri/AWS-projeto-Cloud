@@ -3,10 +3,9 @@ import os
 import boto3
 import json
 
-contador = 0
-dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : [],
-    "policy_name": "", "policy_description": "", "policy_action": [], "policy_effect": "", "policy_resource": ""}
+dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : []}
 nome_instancias = []
+usuarios = []
 
 # O QUE FAZER: MUDAR REGIAO E VER SE JA EXISTEM INFOS NO JSON;
 # DEPOIS MUDAR O LIST TBM, PORQUE VAI DEPENDER DA REGIAO NÉ AMADA
@@ -99,7 +98,6 @@ def manual_uso():
 def criar_restricoes():
     print("Ok, vamos começar então" + "\n")
 
-
     list_describe = {
             "Action": [
             "ec2:Describe*",
@@ -172,6 +170,7 @@ def criar_restricoes():
             "policy_action": list_describe_create_delete["Action"], "policy_resource": list_describe_create_delete["Resource"], "policy_effect": list_describe_create_delete["Effect"] })
         escreve_documento(dict_variables)
 
+
 def criar_usuario():
     print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
     global username
@@ -198,34 +197,77 @@ def criar_usuario():
 
 
 def info_basicas():
+    global region
+    global dict_variables
+    global nome_instancias
+    global documento
+
     print("Então, pronto para começar a construir a infraestrutura? Vamos apenas começar com um detalhe importante..." + "\n")
 
-
-    global region
-    region = input("Digite a região do projeto: ")
+    region = input("Digite a região do projeto (dois exemplos são a us-east-1 e a us-west-2): ")
     print("\n")
 
     vpc_cidr_block = input("Digite o CIDR Block da VPC (como referência dois exemplos: us-east-1 tem como default o 10.0.0.0/16  e a us-west-2 tem como default 172.16.0.0/16): ")
+
+    documento = f'.auto-{region}.tfvars.json'
+
+
+    if os.path.exists(documento):
+        dict_variables = carrega_o_que_esta_no_json()
+        nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
+    else:
+        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : "",
+        "policy_name": "", "policy_description": "", "policy_action": [], "policy_effect": "", "policy_resource": ""}
+        nome_instancias = []
+
+
+    dict_variables = carrega_o_que_esta_no_json()
 
     dict_variables.update({str("aws_region") : str(region)})
     dict_variables.update({str("vpc_cidr_block") : str(vpc_cidr_block)})
     escreve_documento(dict_variables)
 
+
+def mantem_usuario_regioes(dict_antigo):
+    global usuarios
+    global dict_variables
+
+    if dict_antigo["aws_user_name"] != []:
+        for user in dict_antigo["aws_user_name"]:
+            usuarios.append(user)
+        dict_variables["aws_user_name"].append(usuarios)
+        usuarios = [user for user in dict_variables["aws_user_name"]]
+        # print("USUARIOS: ", usuarios)
+
 def mudar_regiao():
-    print("Você escolheu mudar de região. Vamos então atualizar as seguintes informações:" + "\n")
     global region 
-    region = input("Digite a região do projeto: ")
+    global dict_variables
+    global nome_instancias
+    global documento
+    global usuarios
+
+    print("Você escolheu mudar de região. Vamos então atualizar as seguintes informações:" + "\n")
+    region = input("Digite a região do projeto (dois exemplos são a us-east-1 e a us-west-2): ")
     print("\n")
 
     vpc_cidr_block = input("Digite o CIDR Block da VPC (como referência dois exemplos: us-east-1 tem como default o 10.0.0.0/16  e a us-west-2 tem como default 172.16.0.0/16): ")
 
-    global contador
-    global dict_variables
-    global nome_instancias
-    contador = 0
-    dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : "",
-    "policy_name": "", "policy_description": "", "policy_action": [], "policy_effect": "", "policy_resource": ""}
-    nome_instancias = []
+    usuarios = [user for user in dict_variables["aws_user_name"]]
+    # print("USUARIOS: ", usuarios)
+
+    documento = f'.auto-{region}.tfvars.json'
+
+    dict_antigo = dict_variables
+
+    if os.path.exists(documento):
+        dict_variables = carrega_o_que_esta_no_json()
+        nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
+
+        mantem_usuario_regioes(dict_antigo)
+    else:
+        {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : []}
+        mantem_usuario_regioes(dict_antigo)
+        nome_instancias = []
 
 
     dict_variables.update({str("aws_region") : str(region)})
@@ -355,9 +397,7 @@ def create_instances():
     while confere_se_eh_numero(qtd_instancias):
         qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
 
-    global contador
-
-    for contador in range(int(qtd_instancias)):
+    for i in range(int(qtd_instancias)):
         name_instance = input("""
         
         Digite o nome da instância: 
@@ -591,74 +631,60 @@ def aplicar_alteracoes():
 def main():
 
     print("Olá caro usuário, seja bem vindo ao nosso projeto de automação de infraestrutura" + "\n")
-    global region
 
-    region = "us-east-1"
+    info_basicas()
+
+    programa_on = True
+    while programa_on:
+        primeira_resposta = input("""Primeiramente, você gostaria de :
+        
+        0 - Manual de uso da aplicação; 
+        1 - Iniciar uma instância existente;
+        2 - Parar uma instância existente;
+        3 - Criar uma nova instância e security groups;
+        4 - Destruir algum recurso;
+        5 - Listar recursos;
+        6 - Criar um usuário; 
+        7 - Aplicar todas alterações feitas em uma região;
+        8 - Mudar a região onde você está trabalhando;
+        9 - Sair do programa
+        
+        R: """)
 
 
-    primeira_resposta = input("""Primeiramente, você gostaria de :
-    
-    0 - Manual de uso da aplicação; 
-    1 - Iniciar uma instância existente;
-    2 - Parar uma instância existente;
-    3 - Criar uma nova instância e security groups;
-    4 - Destruir algum recurso;
-    5 - Listar recursos;
-    6 - Criar um usuário; 
-    7 - Aplicar todas alterações feitas em uma região;
-    8 - Mudar a região onde você está trabalhando;
-    9 - Sair do programa
-    
-    R: """)
-
-
-    if primeira_resposta == "0":
-        print("Você escolheu manual de uso da aplicação" + "\n")
-        manual_uso()
-        main()
-    elif primeira_resposta == "1":
-        print("Você escolheu iniciar uma instância existente" + "\n")
-        region = input("Digite a região da instância que você quer iniciar: ")
-        lambda_handler_inicia(None, None, region)
-        main()
-    elif primeira_resposta == "2":
-        print("Você escolheu parar uma instância existente" + "\n")
-        region = input("Digite a região da instância que você quer parar: ")
-        lambda_handler_para(None, None, region)
-        main()
-    elif primeira_resposta == "3":
-        print("Você escolheu criar uma nova instância" + "\n")
-        create_instances()
-        main()
-    elif primeira_resposta == "4":
-        print("Você escolheu destruir algum recurso" + "\n")
-        if region == "":
-            info_basicas()
-        destruir_recurso()
-        main()
-    elif primeira_resposta == "5":
-        print("Você escolheu listar recursos" + "\n")
-        if region == "":
-            info_basicas()
-        listar_recursos()
-        main()
-    elif primeira_resposta == "6":
-        print("Você escolheu criar um usuário" + "\n")
-        if region == "":
-            info_basicas()
-        criar_usuario()
-        main()
-    elif primeira_resposta == "7":
-        print("Você escolheu aplicar todas alterações feitas nessa região {region}" + "\n")
-        aplicar_alteracoes()
-        main()
-    elif primeira_resposta == "8":
-        mudar_regiao()
-        main()
-    elif primeira_resposta == "9":
-        print("Você escolheu sair do programa" + "\n")
-        print("Obrigado por usar o nosso programa, volte sempre!" + "\n")
-        return
+        if primeira_resposta == "0":
+            print("Você escolheu manual de uso da aplicação" + "\n")
+            manual_uso()
+        elif primeira_resposta == "1":
+            print("Você escolheu iniciar uma instância existente" + "\n")
+            region = input("Digite a região da instância que você quer iniciar: ")
+            lambda_handler_inicia(None, None, region)
+        elif primeira_resposta == "2":
+            print("Você escolheu parar uma instância existente" + "\n")
+            region = input("Digite a região da instância que você quer parar: ")
+            lambda_handler_para(None, None, region)
+        elif primeira_resposta == "3":
+            print("Você escolheu criar uma nova instância" + "\n")
+            create_instances()
+        elif primeira_resposta == "4":
+            print("Você escolheu destruir algum recurso" + "\n")
+            destruir_recurso()
+        elif primeira_resposta == "5":
+            print("Você escolheu listar recursos" + "\n")
+            listar_recursos()
+        elif primeira_resposta == "6":
+            print("Você escolheu criar um usuário" + "\n")
+            criar_usuario()
+        elif primeira_resposta == "7":
+            print("Você escolheu aplicar todas alterações feitas nessa região {region}" + "\n")
+            aplicar_alteracoes()
+        elif primeira_resposta == "8":
+            mudar_regiao()
+        elif primeira_resposta == "9":
+            print("Você escolheu sair do programa" + "\n")
+            print("Obrigado por usar o nosso programa, volte sempre!" + "\n")
+            programa_on = False
+            return
 
 
 
