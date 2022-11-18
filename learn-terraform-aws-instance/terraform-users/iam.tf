@@ -1,4 +1,21 @@
 
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.16"
+    }
+  }
+
+  required_version = ">= 1.2.0"
+}
+
+# Prover as credenciais da AWS
+provider "aws" {
+  region = "us-east-2"
+}
+   
+
 resource "aws_iam_group" "group" {
     name       = "Alunos"
     path       = "/users/"  

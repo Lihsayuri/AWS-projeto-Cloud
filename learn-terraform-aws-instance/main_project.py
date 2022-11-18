@@ -3,7 +3,8 @@ import os
 import boto3
 import json
 
-dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : []}
+dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : ""}
+dict_users = {"aws_user_name" : []}
 nome_instancias = []
 roda_unica_vez = True
 username = ""
@@ -23,6 +24,13 @@ def escreve_documento(dict_variables):
     json_object = json.dumps(dict_variables, indent = 4)
     with open(documento, 'w') as outfile:
         outfile.write(json_object)
+
+def escreve_usuario(dict_users):
+    file = 'terraform-users/.auto.tfvars.json'
+    json_object = json.dumps(dict_users, indent = 4)
+    with open(file, 'w') as outfile:
+        outfile.write(json_object)
+
 
 def confere_resposta_nao_valida(resposta):
     if resposta == "y" or resposta == "Y" or resposta == "n" or resposta == "N":
@@ -92,8 +100,7 @@ def manual_uso():
 
 
 def criar_restricoes():
-    global documento
-    documento = f'terraform-{region}/.auto-{region}.tfvars.json'
+    global dict_users
 
     print("Ok, vamos começar então" + "\n")
 
@@ -157,22 +164,23 @@ def criar_restricoes():
         opcoes = input("Digite o número da opção que você deseja: ")
 
     if opcoes == "1":
-        dict_variables["aws_user_name"].append({"username" : username, "policy_name": "ReadOnlyAccess_" + username, "policy_description": "Descrever e listar recursos", 
+        dict_users["aws_user_name"].append({"username" : username, "policy_name": "ReadOnlyAccess_" + username, "policy_description": "Descrever e listar recursos", 
             "policy_action": list_describe["Action"], "policy_resource": list_describe["Resource"], "policy_effect": list_describe["Effect"]})
-        escreve_documento(dict_variables)
+        escreve_usuario(dict_users)
     elif opcoes == "2":
-        dict_variables["aws_user_name"].append({"username" : username, "policy_name": "ReadWriteAccess_" + username, "policy_description": "Descrever, listar e criar recursos", 
+        dict_users["aws_user_name"].append({"username" : username, "policy_name": "ReadWriteAccess_" + username, "policy_description": "Descrever, listar e criar recursos", 
             "policy_action": list_describe_create["Action"], "policy_resource": list_describe_create["Resource"], "policy_effect": list_describe_create["Effect"] })
-        escreve_documento(dict_variables)
+        escreve_usuario(dict_users)
     elif opcoes == "3":
-        dict_variables["aws_user_name"].append({"username" : username, "policy_name": "ReadWriteDeleteAccess_" + username, "policy_description": "Descrever, listar, criar e destruir recursos", 
+        dict_users["aws_user_name"].append({"username" : username, "policy_name": "ReadWriteDeleteAccess_" + username, "policy_description": "Descrever, listar, criar e destruir recursos", 
             "policy_action": list_describe_create_delete["Action"], "policy_resource": list_describe_create_delete["Resource"], "policy_effect": list_describe_create_delete["Effect"] })
-        escreve_documento(dict_variables)
+        escreve_usuario(dict_users)
 
 
 def criar_usuario():
     print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
     global username
+    global dict_users
     username = input("Digite o seu nome de usuário: ")
     print("\n")
 
@@ -191,8 +199,8 @@ def criar_usuario():
     if criar_politicas == "y" or criar_politicas == "Y":
         criar_restricoes()
     elif criar_politicas == "n" or criar_politicas == "N":
-        dict_variables["aws_user_name"].append({"username": username, "policy_name": "FullAccess_" + username, "policy_description": "Usuario possui acesso a tudo", "policy_action": ["*"], "policy_resource": "*", "policy_effect": "Allow"})
-        escreve_documento(dict_variables)
+        dict_users["aws_user_name"].append({"username": username, "policy_name": "FullAccess_" + username, "policy_description": "Usuario possui acesso a tudo", "policy_action": ["*"], "policy_resource": "*", "policy_effect": "Allow"})
+        escreve_usuario(dict_users)
         print("Ok, vamos continuar então" + "\n")
 
 
@@ -288,11 +296,8 @@ def mudar_regiao():
     if os.path.exists(documento):
         dict_variables = carrega_o_que_esta_no_json()
         # nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
-
-        # mantem_usuario_regioes(dict_antigo)
     else:
         dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : [], "aws_user_name" : []}
-        # mantem_usuario_regioes(dict_antigo)
         nome_instancias = []
 
 
@@ -687,6 +692,8 @@ def aplicar_alteracoes():
 
     os.system(f'cd terraform-{region} && terraform init && terraform  plan -var-file={documento} && terraform apply -var-file={documento}')
 
+    os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+
     # os.system("terraform init")
     # os.system(f'terraform terraform plan -var-file={documento}')
     # os.system(f'terraform apply -var-file={documento}')
@@ -699,6 +706,9 @@ def main():
     print("Olá caro usuário, seja bem vindo ao nosso projeto de automação de infraestrutura" + "\n")
 
     info_basicas()
+
+    global dict_users
+    escreve_usuario(dict_users)
 
     programa_on = True
     while programa_on:
