@@ -88,8 +88,7 @@ def manual_uso():
     - Você não pode deletar completamente o security group de uma instância. Dessa forma, caso você escolha essa opção, serão apagadas todas as regras (exceto a padrão que já vem na própria criação de instância na AWS).
     - As restrições que você irá aplicar ao usuário já são pré-definidas para facilitar a sua configuração.
     - Mudanças só serão feitas se você selecionar a opção aplicar mudanças.
-    - Para acessar a senha do usuário e poder mexer no console da AWS vá para o documento file.txt criado, nele estará sua senha.
-        Mas antes de acessar o file, pergunte para quem criou o programa a senha para descriptografar o arquivo (ela será pedida na tela). 
+    - Para acessar a senha do usuário e poder mexer no console da AWS, primeiro você terá que selecionar a opção para aplicar as mudanças e depois de aplicadas, como output do programa você terá as informações sobre os usuários criados, o que inclue as senhas de 10 dígitos.
 
     EOF
 
