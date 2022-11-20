@@ -6,7 +6,6 @@ import json
 dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : ""}
 dict_users = {"aws_user_name" : []}
 nome_instancias = []
-roda_unica_vez = True
 username = ""
 region = ""
 
@@ -18,6 +17,12 @@ def carrega_o_que_esta_no_json():
     with open(documento, 'r') as json_file:
         dict_variables = json.load(json_file)
     return dict_variables
+
+def carrega_o_que_esta_no_json_users():
+    file = 'terraform-users/.auto.tfvars.json'
+    with open(file, 'r') as json_file:
+        dict_users = json.load(json_file)
+    return dict_users
 
 def escreve_documento(dict_variables):
     documento = f'terraform-{region}/.auto-{region}.tfvars.json'
@@ -176,6 +181,9 @@ def criar_restricoes():
         escreve_usuario(dict_users)
 
 
+    os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+
+
 def criar_usuario():
     print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
     global username
@@ -201,11 +209,13 @@ def criar_usuario():
         dict_users["aws_user_name"].append({"username": username, "policy_name": "FullAccess_" + username, "policy_description": "Usuario possui acesso a tudo", "policy_action": ["*"], "policy_resource": "*", "policy_effect": "Allow"})
         escreve_usuario(dict_users)
         print("Ok, vamos continuar então" + "\n")
-
+        
+        os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
 
 def info_basicas():
     global region
     global dict_variables
+    global dict_users
     global nome_instancias
     global documento
 
@@ -237,9 +247,11 @@ def info_basicas():
 
     if os.path.exists(documento):
         dict_variables = carrega_o_que_esta_no_json()
+        dict_users = carrega_o_que_esta_no_json_users()
         nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
     else:
-        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "aws_user_name" : []}
+        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : "", "vpc_cidr_block":""}
+        dict_users = {"aws_user_name" : []}
         nome_instancias = []
 
 
@@ -248,22 +260,10 @@ def info_basicas():
     escreve_documento(dict_variables)
 
 
-def mantem_usuario_regioes(dict_antigo):
-    global dict_variables
-
-    print(dict_antigo["aws_user_name"])
-
-    if dict_antigo["aws_user_name"] == []:
-        print("Vazio")
-        return dict_antigo
-    for i in range(len(dict_antigo["aws_user_name"])):
-        if dict_antigo["aws_user_name"][i] not in dict_variables["aws_user_name"]:
-            dict_variables["aws_user_name"].append(dict_antigo["aws_user_name"][i])
-        print("ENTREI AQUI NO USERS")
-
 def mudar_regiao():
     global region 
     global dict_variables
+    global dict_users
     global nome_instancias
     global documento
 
@@ -294,9 +294,10 @@ def mudar_regiao():
 
     if os.path.exists(documento):
         dict_variables = carrega_o_que_esta_no_json()
-        # nome_instancias = [instance for instance in {key for key in dict_variables["virtual_machines"]}]
+        dict_users = carrega_o_que_esta_no_json_users()
     else:
-        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : [], "aws_user_name" : []}
+        dict_variables = {"virtual_machines" : {},  "sec_groups" : {}, "sec_group_instances": {}, "aws_region" : []}
+        dict_users = {"aws_user_name" : []}
         nome_instancias = []
 
 
@@ -391,7 +392,7 @@ def cria_sec_group():
 
 
 
-def cria_sec_group_padrao():
+def cria_sec_group_padrao(name_instance):
 
 
     lista_regras = []
@@ -415,19 +416,14 @@ def cria_sec_group_padrao():
 
 
     for i in range(len(nome_instancias)):
-        dict_variables["sec_group_instances"].update({str(nome_instancias[i]) : {"sec_names" : ["standard"]}})
-        escreve_documento(dict_variables)
-
-
+        if nome_instancias[i] == name_instance:
+            dict_variables["sec_group_instances"].update({str(nome_instancias[i]) : {"sec_names" : ["standard"]}})
+            escreve_documento(dict_variables)
 
 
 def create_instances():
     global region
     global roda_unica_vez
-
-    if roda_unica_vez:
-        cria_sec_group_padrao()
-        roda_unica_vez = False
 
     qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
 
@@ -456,7 +452,7 @@ def create_instances():
         elif image_id_resposta == "1" and region == "us-west-1":
             image_id = "ami-03f6d497fceb40069"
         elif image_id_resposta == "2" and region == "us-west-1":
-            image_id = "ami-017fecd1353bcc96e"
+            image_id = "ami-02ea247e531eb3ce6"
         
         
         while True:
@@ -498,7 +494,7 @@ def create_instances():
         cria_sec_group()
     elif sec_group == "n" or sec_group == "N":
         print("Ok, então o grupo de segurança vai ser padrão" + "\n")
-        cria_sec_group_padrao()
+        cria_sec_group_padrao(name_instance)
 
         print("\n")
 
@@ -584,7 +580,6 @@ def destruir_recurso():
         user_destruir = input("""Você escolheu destruir um usuário. 
         Digite o nome do usuário que você quer destruir: """)
 
-        # confere se o user_destruir está no dict_variables["aws_user_name" FAZER
 
         destruir_yes_no = input(f'Você está prestes a destruir o usuário {user_destruir}. Você tem certeza que quer destruir o usuário? (y/n). \n R: ')
 
@@ -593,12 +588,14 @@ def destruir_recurso():
 
         if destruir_yes_no == "y" or "Y":
             print("Ok, destruindo o usuário" + "\n")
-            size = len(dict_variables["aws_user_name"])
+            size = len(dict_users["aws_user_name"])
             for i in range(size):
-                if dict_variables["aws_user_name"][i]["username"] == user_destruir:
-                    dict_variables["aws_user_name"].pop(i)
+                if dict_users["aws_user_name"][i]["username"] == user_destruir:
+                    dict_users["aws_user_name"].pop(i)
                     size = size - 1
-                    escreve_documento(dict_variables)
+                    escreve_usuario(dict_users)
+                    os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+                    break
 
         elif destruir_yes_no == "n" or "N":
             print("Ok, então não destruiremos o usuário" + "\n")
@@ -689,9 +686,11 @@ def aplicar_alteracoes():
 
     os.system("source ~/.bashrc")
 
+    os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+
     os.system(f'cd terraform-{region} && terraform init && terraform  plan -var-file={documento} && terraform apply -var-file={documento}')
 
-    os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+    # os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
 
     # os.system("terraform init")
     # os.system(f'terraform terraform plan -var-file={documento}')
@@ -763,17 +762,5 @@ def main():
 
 
 
-
-# Executa a função main
 main()
-# criar_usuario()
 
-
-
-
-
-# os.system("terraform output password | base64 -d > test.txt")
-
-# os.system("gpg --decrypt test.txt > file.txt")
-
-# region_global = "us-east-1"

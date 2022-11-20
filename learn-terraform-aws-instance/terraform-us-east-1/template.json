@@ -324,3 +324,97 @@ ACHO Q ESSE AGORA VAI:
     ],
     "vpc_cidr_block": "172.16.0.0/16"
 }
+
+--------------------------------------------------------------------------
+
+"virtual_machines": {
+    "vm1": {
+        "image_id": "ami-0149b2da6ceec4bb0",
+        "instance_type": "t2.micro"
+    },
+    "vm2": {
+        "image_id": "ami-08c40ec9ead489470",
+        "instance_type": "t2.micro"
+    }
+},
+"sec_groups": {
+    "ssh-http-https": {
+        "name": "ssh-http-https",
+        "ingress": [
+            {
+                "ingress": {
+                    "description": "Allow inbound traffic",
+                    "from_port": 0,
+                    "to_port": 0,
+                    "protocol": -1,
+                    "ipv6_cidr_blocks": null,
+                    "prefix_list_ids": null,
+                    "self": null,
+                    "security_groups": null,
+                    "cidr_blocks": [
+                        "0.0.0.0/0"
+                    ]
+                }
+            },
+            {
+                "ingress": {
+                    "description": "ssh libera",
+                    "from_port": "22",
+                    "to_port": "22",
+                    "protocol": "tcp",
+                    "ipv6_cidr_blocks": null,
+                    "prefix_list_ids": null,
+                    "self": null,
+                    "security_groups": null,
+                    "cidr_blocks": [
+                        "0.0.0.0/0"
+                    ]
+                }
+            },
+            {
+                "ingress": {
+                    "description": "http libera",
+                    "from_port": "80",
+                    "to_port": "80",
+                    "protocol": "tcp",
+                    "ipv6_cidr_blocks": null,
+                    "prefix_list_ids": null,
+                    "self": null,
+                    "security_groups": null,
+                    "cidr_blocks": [
+                        "0.0.0.0/0"
+                    ]
+                }
+            },
+            {
+                "ingress": {
+                    "description": "https libera",
+                    "from_port": "443",
+                    "to_port": "443",
+                    "protocol": "tcp",
+                    "ipv6_cidr_blocks": null,
+                    "prefix_list_ids": null,
+                    "self": null,
+                    "security_groups": null,
+                    "cidr_blocks": [
+                        "0.0.0.0/0"
+                    ]
+                }
+            }
+        ]
+    }
+},
+"sec_group_instances": {
+    "vm1": {
+        "sec_names": [
+            "ssh-http-https"
+        ]
+    },
+    "vm2": {
+        "sec_names": [
+            "ssh-http-https"
+        ]
+    }
+},
+"aws_region": "us-east-1",
+"vpc_cidr_block": "10.0.0.0/16"
