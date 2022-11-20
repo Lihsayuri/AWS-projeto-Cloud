@@ -12,14 +12,14 @@ terraform {
 
 # Prover as credenciais da AWS
 provider "aws" {
-  region = "us-east-2"
+  region = "eu-central-1"
 }
    
 
-resource "aws_iam_group" "group" {
-    name       = "Alunos"
-    path       = "/users/"  
-}
+# resource "aws_iam_group" "group" {
+#     name       = "Alunos"
+#     path       = "/users/"  
+# }
 
 resource "aws_iam_user" "user" {
   for_each = {for user in var.aws_user_name : user.username => user}
@@ -47,13 +47,13 @@ resource "aws_iam_user_login_profile" "profile" {
   password_length         =  10   
 }
 
-resource "aws_iam_user_group_membership" "add_user" {
-    for_each = {for user in var.aws_user_name: user.username => user}
-    # for_each = var.aws_user_name
-    user         =  each.value.username                          
-    groups = [aws_iam_group.group.name]
-    depends_on = [aws_iam_user.user]
-}
+# resource "aws_iam_user_group_membership" "add_user" {
+#     for_each = {for user in var.aws_user_name: user.username => user}
+#     # for_each = var.aws_user_name
+#     user         =  each.value.username                          
+#     groups = [aws_iam_group.group.name]
+#     depends_on = [aws_iam_user.user]
+# }
 
 
 resource "aws_iam_policy" "start_stop" {
@@ -125,17 +125,22 @@ resource "aws_iam_policy" "niveis" {
 
 
 
-resource "aws_iam_policy_attachment" "attach" {
-    name       = "EC2StartStopOwnInstances"
-    groups     = [aws_iam_group.group.name]
-    policy_arn = aws_iam_policy.start_stop.arn
+resource "aws_iam_user_policy_attachment" "attach" {
+    for_each = {for user in var.aws_user_name: user.username => user}
+    user       = aws_iam_user.user[each.value.username].name
+    policy_arn =  aws_iam_policy.start_stop.arn
+    # name       = "EC2StartStopOwnInstances"
+    # groups     = [aws_iam_group.group.name]
+    # policy_arn = aws_iam_policy.start_stop.arn
 
 }
 
-resource "aws_iam_policy_attachment" "attach2" {
-    name       = "ChangePass"
-    groups     = [aws_iam_group.group.name]
-    policy_arn = aws_iam_policy.change_pass.arn
+resource "aws_iam_user_policy_attachment" "attach2" {
+    for_each = {for user in var.aws_user_name: user.username => user}
+    user       = aws_iam_user.user[each.value.username].name
+    policy_arn       = aws_iam_policy.change_pass.arn
+    # groups     = [aws_iam_group.group.name]
+    # policy_arn = aws_iam_policy.change_pass.arn
 
 }
 
