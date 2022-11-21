@@ -56,15 +56,35 @@ Abra o documento:
 
 E escreva no fim do documento as seguintes linhas:
 
+```
 export AWS_ACCESS_KEY_ID= <SUA_ACCESS_KEY>
 
 export AWS_SECRET_ACCESS_KEY= <SUA_SECRET_ACCESS_KEY>
+
+```
 
 Feito isso, volte para a pasta onde está trabalhando e rode o seguinte comando:
 
 `source ~/.bashrc`
 
-**Cuidado**: não publique essas chaves de maneira alguma.
+Ainda você também terá que colocar essas chaves em outro documento. Mais uma vez vá até o diretório raiz e procure pela pasta `.aws`. Acesse-a pelo terminal e crie um documento chamado credentials, através do comando abaixo:
+
+`touch credentials`
+
+Depois edite o documento através do comando:
+
+`nano credentials`
+
+Escreve as seguintes linhas:
+
+```[default]
+aws_access_key_id=<sua_access_key>
+aws_secret_access_key=<sua_secret_access_key>
+```
+
+Pronto, agora sim vamos à aplicação.
+
+#### CUIDADO :warning: :no_entry_sign: : não publique essas chaves de maneira alguma.
 
 
 ## Iniciando :computer:
