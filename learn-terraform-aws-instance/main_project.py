@@ -11,6 +11,17 @@ region = ""
 
 global documento
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 def carrega_o_que_esta_no_json():
     documento = f'terraform-{region}/.auto-{region}.tfvars.json'
@@ -41,7 +52,7 @@ def confere_resposta_nao_valida(resposta):
     if resposta == "y" or resposta == "Y" or resposta == "n" or resposta == "N":
         return False
     else:
-        print("Você não digitou uma resposta válida. Tente novamente" + "\n")
+        print(f"{bcolors.FAIL}Você não digitou uma resposta válida. Tente novamente {bcolors.ENDC}" + "\n")
         return True
 
 def confere_se_eh_numero(resposta):
@@ -49,23 +60,23 @@ def confere_se_eh_numero(resposta):
         if resposta.isdigit():
             return False
     else:
-        print("Você não digitou um número. Tente novamente" + "\n")
+        print(f"{bcolors.FAIL}Você não digitou um número. Tente novamente {bcolors.ENDC}" + "\n")
         return True
 
 
 def manual_uso():
-    print(""" 
+    print(f"""{bcolors.OKCYAN} 
     
-    ===================================================================================================
+===================================================================================================
 
-    Bem-vindo ao manual de uso da aplicação de criação de recursos na AWS.
+Bem-vindo ao manual de uso da aplicação de criação de recursos na AWS.
 
-    ===================================================================================================
+===================================================================================================
 
     A aplicação foi desenvolvida para facilitar a criação de instâncias na AWS, com a possibilidade de criar
     instâncias com diferentes configurações de segurança (grupos de segurança) que possuem diferentes regras.
 
-    Dessa forma, você poderá:
+Dessa forma, você poderá:
     - Criar instâncias com nome, imagem da máquina, tipo de host.
     - Criar grupos de segurança e associar a essas máquinas.
     - Criar regras de segurança para os grupos de segurança.
@@ -73,7 +84,7 @@ def manual_uso():
     - Listar os recursos criados, como instâncias, grupos de segurança e suas regras e usuários.
     - Deletar instâncias, grupos de segurança, regras de grupo de segurança, e usuário (o que você criou).
 
-    Observação para esta aplicação : 
+Observação para esta aplicação : 
     - Você deve ter instalado o Python 3.8.5 ou superior.
     - Você deve ter instalado o Terraform 0.14.5 ou superior.
     - Você deve ter instalado o AWS CLI 2.1.19 ou superior.
@@ -81,32 +92,35 @@ def manual_uso():
     - Você deve ter instalado o JSON 2.0.9 ou superior.
     - Você deve ter instalado o OS 1.0.1 ou superior.
 
-    Observações de uso da aplicação:
+Observações de uso da aplicação:
     - Você deve ter uma conta na AWS.
     - Você deve ter um usuário com permissões de acesso a recursos da AWS.
-    - Você deve colocar as credenciais do usuário no arquivo ~/.bashrc ou outro arquivo que carregue as variáveis de ambiente. Basta colocar as linhas abaixo no arquivo:
-        export AWS_ACCESS_KEY_ID = SUA_ACCESS_KEY_ID"
-        export AWS_SECRET_ACCESS_KEY = "SUA_SECRET_ACCESS_KEY"        
-        E rodar o comando: source ~/.bashrc ou outro dependendo do arquivo em que você colocou as variáveis de ambiente.
+    - Você deve colocar as credenciais do usuário no arquivo ~/.bashrc ou outro arquivo que carregue as variáveis de ambiente. 
+        Basta colocar as linhas abaixo no arquivo:
+            export AWS_ACCESS_KEY_ID = SUA_ACCESS_KEY_ID"
+            export AWS_SECRET_ACCESS_KEY = "SUA_SECRET_ACCESS_KEY"        
+            E rodar o comando: source ~/.bashrc ou outro dependendo do arquivo em que você colocou as variáveis de ambiente.
 
     Observações sobre os manuseios dos recursos:
-    - Você não pode deletar completamente o security group de uma instância. Dessa forma, caso você escolha essa opção, serão apagadas todas as regras (exceto a padrão que já vem na própria criação de instância na AWS).
+    - Você não pode deletar completamente o security group de uma instância. Dessa forma, caso você escolha essa opção, serão 
+      apagadas todas as regras (exceto a padrão que já vem na própria criação de instância na AWS).
     - As restrições que você irá aplicar ao usuário já são pré-definidas para facilitar a sua configuração.
     - Mudanças só serão feitas se você selecionar a opção aplicar mudanças.
-    - Para acessar a senha do usuário e poder mexer no console da AWS, primeiro você terá que selecionar a opção para aplicar as mudanças e depois de aplicadas, como output do programa você terá as informações sobre os usuários criados, o que inclue as senhas de 10 dígitos.
+    - Para acessar a senha do usuário e poder mexer no console da AWS, primeiro você terá que selecionar a opção para aplicar as mudanças e depois
+      de aplicadas, como output do programa você terá as informações sobre os usuários criados, o que inclue as senhas de 10 dígitos.
 
     EOF
 
-    """)
+    {bcolors.ENDC}""")
 
-    pronto = input("Digite qualquer tecla para continuar" + "\n")
+    pronto = input(f"{bcolors.OKGREEN}Digite qualquer tecla para continuar" + "\n")
 
 
 
 def criar_restricoes():
     global dict_users
 
-    print("Ok, vamos começar então" + "\n")
+    print(f"{bcolors.OKCYAN}Ok, vamos começar então {bcolors.ENDC}" + "\n")
 
     list_describe = {
             "Action": [
@@ -156,16 +170,19 @@ def criar_restricoes():
         "Resource": "*"
         }
 
-    opcoes = input("""Para facilitar sua vida, você pode escolher entre as seguintes opções:
+    opcoes = input(f""" {bcolors.OKCYAN}
+    
+    Para facilitar sua vida, você pode escolher entre as seguintes opções:
 
-    1-  Descrever e listar recursos;
-    2 - Descrever, listar e criar recursos;
-    3 - Descrever, listar, criar e destruir recursos.
+        1-  Descrever e listar recursos;
+        2 - Descrever, listar e criar recursos;
+        3 - Descrever, listar, criar e destruir recursos.
 
-    Digite o número da opção que você deseja: """)   
+    Digite o número da opção que você deseja: {bcolors.ENDC}""")   
 
     while confere_se_eh_numero(opcoes):
-        opcoes = input("Digite o número da opção que você deseja: ")
+        print("\n")
+        opcoes = input(f"{bcolors.OKCYAN} Digite o número da opção que você deseja: {bcolors.ENDC}")
 
     if opcoes == "1":
         dict_users["aws_user_name"].append({"username" : username, "policy_name": "ReadOnlyAccess_" + username, "policy_description": "Descrever e listar recursos", 
@@ -185,30 +202,32 @@ def criar_restricoes():
 
 
 def criar_usuario():
-    print("Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado" + "\n")
+    print(f"{bcolors.OKCYAN}Então, pronto para começar a construir a infraestrutura? Vamos começar com o seu usuário a ser criado {bcolors.ENDC}" + "\n")
     global username
     global dict_users
-    username = input("Digite o seu nome de usuário: ")
+    username = input(f"{bcolors.OKCYAN}Digite o seu nome de usuário: {bcolors.ENDC}")
     print("\n")
 
 
-    print("""Esse usuário criado já vem com as seguintes permissões: 
+    print(f"""
+    {bcolors.OKCYAN}
+    Esse usuário criado já vem com as seguintes permissões: 
         - Criar e parar instâncias;
         - Alterar senha;
-    """)
+    {bcolors.ENDC}""")
 
-
-    criar_politicas = input("Você gostaria de criar restrições a esse usuário? (y/n)")
+    print("\n")
+    criar_politicas = input(f"{bcolors.OKCYAN}Você gostaria de criar restrições a esse usuário? (y/n). Se resposta for n, ele terá todas as permissões {bcolors.ENDC}")
 
     while confere_resposta_nao_valida(criar_politicas):
-        criar_politicas = input("Você gostaria de criar restrições a esse usuário? (y/n) Se resposta for n, ele terá todas as permissões.")
+        criar_politicas = input(f"{bcolors.OKCYAN}Você gostaria de criar restrições a esse usuário? (y/n). Se resposta for n, ele terá todas as permissões. {bcolors.ENDC}")
 
     if criar_politicas == "y" or criar_politicas == "Y":
         criar_restricoes()
     elif criar_politicas == "n" or criar_politicas == "N":
         dict_users["aws_user_name"].append({"username": username, "policy_name": "FullAccess_" + username, "policy_description": "Usuario possui acesso a tudo", "policy_action": ["*"], "policy_resource": "*", "policy_effect": "Allow"})
         escreve_usuario(dict_users)
-        print("Ok, vamos continuar então" + "\n")
+        print(f"{bcolors.OKGREEN} Ok, vamos continuar então {bcolors.ENDC}" + "\n")
         
         os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
 
@@ -219,16 +238,16 @@ def info_basicas():
     global nome_instancias
     global documento
 
-    print("Então, pronto para começar a construir a infraestrutura? Vamos apenas começar com um detalhe importante..." + "\n")
+    print(f"{bcolors.OKCYAN}Então, pronto para começar a construir a infraestrutura? Vamos apenas começar com um detalhe importante... {bcolors.ENDC} \n ")
 
-    resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
+    resposta = input(f"{bcolors.OKCYAN}Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
     print("\n")
 
     while True:
         if resposta == "1" or resposta == "2":
             break
         else:
-            resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
+            resposta = input(f"{bcolors.FAIL}Resposta inválida. Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]? {bcolors.ENDC}")
 
 
     if resposta == "1":
@@ -267,15 +286,15 @@ def mudar_regiao():
     global nome_instancias
     global documento
 
-    print("Você escolheu mudar de região. Vamos então atualizar as seguintes informações:" + "\n")
-    resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
+    print(f"{bcolors.OKCYAN} Você escolheu mudar de região. Vamos então atualizar as seguintes informações: {bcolors.ENDC}" + "\n")
+    resposta = input(f"{bcolors.OKCYAN} Em qual região você vai construir sua infraestrutura? Digite o número da região desejada [1 - us-east-1 ou 2- us-west-1]? {bcolors.ENDC}")
     print("\n")
 
     while True:
         if resposta == "1" or resposta == "2":
             break
         else:
-            resposta = input("Em qual região você vai construir sua infraestrutura? [1 - us-east-1 ou 2- us-west-1]?")
+            resposta = input(f"{bcolors.OKCYAN}Em qual região você vai construir sua infraestrutura? Digite o número da região desejada [1 - us-east-1 ou 2- us-west-1]? {bcolors.ENDC}")
 
 
     if resposta == "1":
@@ -310,17 +329,17 @@ def mudar_regiao():
 def cria_sec_group():
     null = None
 
-    print("Vamos criar um grupo de segurança para a instância. Mas antes..." + "\n")
+    print(f"{bcolors.OKCYAN}Vamos criar um grupo de segurança para a instância. Mas antes... {bcolors.ENDC}" + "\n")
 
-    qtd_sec_group = input("\n Quantos grupos de segurança você quer criar?" + "\n")
+    qtd_sec_group = input(f" {bcolors.OKCYAN} Quantos grupos de segurança você quer criar? {bcolors.ENDC}" + "\n")
 
     for i in range(int(qtd_sec_group)):
         lista_group_name = []
 
-        security_group_name = input("Digite o nome do grupo de segurança: ")
+        security_group_name = input(f"{bcolors.OKCYAN}Digite o nome do grupo de segurança número {i}: {bcolors.ENDC}")
         print("\n")
 
-        qtd_rules = input("Quantas regras você quer criar para esse grupo de segurança? ")
+        qtd_rules = input(f"{bcolors.OKCYAN}Quantas regras você quer criar para esse grupo de segurança? {bcolors.ENDC}")
 
         dict_standard_rule = {"ingress" : {"description" : "Allow inbound traffic", \
                             "from_port" : 0, \
@@ -335,15 +354,15 @@ def cria_sec_group():
         lista_regras = [dict_standard_rule]
 
         for i in range(int(qtd_rules)):
-            description_security_group = input("Digite a descrição da regra do grupo de segurança: ")
+            description_security_group = input(f"{bcolors.OKCYAN}Digite a descrição da regra do grupo de segurança número {i}: {bcolors.ENDC}")
             print("\n")
-            aws_from_port = input("Digite a porta de origem: ")
+            aws_from_port = input(f"{bcolors.OKCYAN}Digite a porta de origem R:{bcolors.ENDC}")
             print("\n")
-            aws_to_port = input("Digite a porta de destino: ")
+            aws_to_port = input(f"{bcolors.OKCYAN}Digite a porta de destino R:{bcolors.ENDC}")
             print("\n")
-            aws_protocol = input("Digite o protocolo: ")
+            aws_protocol = input(f"{bcolors.OKCYAN}Digite o protocolo R:{bcolors.ENDC}")
             print("\n")
-            aws_cidr_blocks = input("Digite o bloco de ip: ")
+            aws_cidr_blocks = input(f"{bcolors.OKCYAN}Digite o bloco CIDR R: {bcolors.ENDC}")
             print("\n")
 
             dict_rules = {"ingress" : {"description" : str(description_security_group), \
@@ -363,16 +382,13 @@ def cria_sec_group():
 
         flag = True
         while flag:
-            nome_inst_sec = input("Não menos importante, qual(ou quais) instância(s) você quer associar a esse grupo de segurança?")
+            nome_inst_sec = input(f"{bcolors.OKCYAN} Não menos importante, qual(ou quais) instância(s) você quer associar a esse grupo de segurança?{bcolors.ENDC}")
 
             instancias = list(set(nome_inst_sec.split(",")))
-            # eliminar repetição de instancias
-
-            print(instancias)
 
             for i in range(len(instancias)):
                 if instancias[i] not in nome_instancias:
-                    print("Você não digitou um nome válido. Tente novamente" + "\n")
+                    print(f"{bcolors.FAIL}Você não digitou um nome válido. Tente novamente {bcolors.ENDC}" + "\n")
                 else:
                     if i == len(instancias)-1:
                         flag = False
@@ -386,11 +402,6 @@ def cria_sec_group():
                 dict_variables["sec_group_instances"].update({str(nome_inst_sec_group) : {"sec_names" : [str(security_group_name)]}})
 
         escreve_documento(dict_variables)
-
-        # DEPOIS VÊ ISSO PARA COLOCAR O PADRÃO JUNTO E VER OS DESTROYS. DEPOIS PARTIR P OUTRAS REGIÕES
-        # cria_sec_group_padrao()
-
-
 
 def cria_sec_group_padrao(name_instance):
 
@@ -421,29 +432,28 @@ def cria_sec_group_padrao(name_instance):
             escreve_documento(dict_variables)
 
 
-def create_instances():
+def criar_instancias():
     global region
-    global roda_unica_vez
 
-    qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
+    qtd_instancias = input(f"\n {bcolors.OKCYAN}Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar? {bcolors.ENDC}" + "\n")
 
     while confere_se_eh_numero(qtd_instancias):
-        qtd_instancias = input("\n Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar?" + "\n")
+        qtd_instancias = input(f"\n {bcolors.FAIL} Resposta inválida. Agora vamos para informações sobre a instância que você quer criar. Primeiro, quantas instâncias você quer criar? {bcolors.ENDC}" + "\n")
 
     for i in range(int(qtd_instancias)):
-        name_instance = input("""
+        name_instance = input(f"""{bcolors.OKCYAN}
         
-        Digite o nome da instância: 
+    Digite o nome da instância: 
         
-        R: """)
+    R: {bcolors.ENDC}""")
         
         nome_instancias.append(name_instance)
 
-        image_id_resposta = input("""
+        image_id_resposta = input(f""" {bcolors.OKCYAN}
         
-        Qual imagem você quer utilizar na instância? [1 - Ubuntu Server 20.04 LTS ou 2 - Ubuntu Server 22.04 LTS]
+    Qual imagem você quer utilizar na instância? [1 - Ubuntu Server 20.04 LTS ou 2 - Ubuntu Server 22.04 LTS]
         
-        R: """)
+    R: {bcolors.ENDC}""")
 
         if image_id_resposta == "1" and region == "us-east-1":
             image_id = "ami-0149b2da6ceec4bb0"
@@ -456,22 +466,22 @@ def create_instances():
         
         
         while True:
-            instance_type_choice = input("""
+            instance_type_choice = input(f"""{bcolors.OKCYAN}
 
-            Agora você tem que escolher o tipo da instância a ser usada no servidor
+        Agora você tem que escolher o tipo da instância a ser usada no servidor
             
-            Você pode escolher dentre as seguintes: 
+        Você pode escolher dentre as seguintes: 
             1 - t2.micro;
             2 - t2.small;
             3 - t2.medium;
             4- t2.large
             
-            R: """)
+            R: {bcolors.ENDC}""")
 
             if instance_type_choice == "1" or instance_type_choice == "2" or instance_type_choice == "3" or instance_type_choice == "4":
                 break
             else:
-                print("Você não digitou um tipo válido. Tente novamente" + "\n")
+                print(f"{bcolors.FAIL}Você não digitou um tipo válido. Tente novamente {bcolors.ENDC}" + "\n")
         # instance_type_choice = input("\n  Você pode escolher dentre as seguintes: [1 - t2.micro, 2 - t2.small, 3 - t2.medium, 4- t2.large]?")
         if instance_type_choice == "1":
             instance_type = "t2.micro"
@@ -485,15 +495,15 @@ def create_instances():
         dict_variables["virtual_machines"].update({str(name_instance) : {"image_id" : str(image_id), "instance_type" : str(instance_type)}})
         escreve_documento(dict_variables)   
 
-    sec_group = input("Você quer criar security groups com regras? (y/n)")
+    sec_group = input(f"{bcolors.OKCYAN} Você quer criar security groups com regras? (y/n) {bcolors.ENDC}" + "\n")
 
     while confere_resposta_nao_valida(sec_group):
-        sec_group = input("Você quer criar um security group com regras? (y/n)")
+        sec_group = input(f"{bcolors.OKCYAN}Você quer criar um security group com regras? (y/n) {bcolors.ENDC} \n")
 
     if sec_group == "y" or sec_group == "Y":
         cria_sec_group()
     elif sec_group == "n" or sec_group == "N":
-        print("Ok, então o grupo de segurança vai ser padrão" + "\n")
+        print(f"{bcolors.OKCYAN} Ok, então o grupo de segurança vai ser padrão {bcolors.ENDC}" + "\n")
         cria_sec_group_padrao(name_instance)
 
         print("\n")
@@ -506,7 +516,7 @@ def lambda_handler_para(event, context, region):
 
 
 def lambda_handler_inicia(event, context, region):
-    instances = [input("Agora digite o id da instância que você quer começar: ")]
+    instances = [input(f"{bcolors.OKGREEN}Agora digite o id da instância que você quer começar: {bcolors.ENDC}")]
     ec2 = boto3.client('ec2', region_name=region)
     ec2.start_instances(InstanceIds=instances)
     print('started your instances: ' + str(instances))
@@ -516,55 +526,61 @@ def destruir_recurso():
 
     dict_variables = carrega_o_que_esta_no_json()
 
-    destruir = input("""Qual recurso você gostaria de destruir:
+    destruir = input(f"""{bcolors.OKCYAN}
+    Qual recurso você gostaria de destruir:
+
     1- Instância;
-    2- Grupo de sergurança;
+    2- Grupo de segurança;
     3- Usuário;
     4- Regra de um grupo de segurança
     
-    R: """)
+    R: {bcolors.ENDC}""")
 
     if destruir == "1":
-        instancia_destruir = input("""Você escolheu destruir uma instância.
-        Digite o nome da instância que você quer destruir:
-        R: """)
+        instancia_destruir = input(f"""{bcolors.OKCYAN}
+    Você escolheu destruir uma instância.
+    Digite o nome da instância que você quer destruir:
+    R: {bcolors.ENDC}""")
+        print("\n")
 
         inst_selecionada = dict_variables["virtual_machines"][instancia_destruir]
 
-        destruir_yes_no = input(f'Você está prestes a destruir a instância {instancia_destruir}: {inst_selecionada} \n .Você tem certeza que quer destruir a instância? (y/n)')
+        destruir_yes_no = input(f'{bcolors.WARNING}Você está prestes a destruir a instância {instancia_destruir}: {inst_selecionada} \n .Você tem certeza que quer destruir a instância? (y/n) {bcolors.ENDC}')
 
         while confere_resposta_nao_valida(destruir_yes_no):
-            destruir_yes_no = input("Você tem certeza que quer destruir a instância? (y/n)")
+            destruir_yes_no = input(f"{bcolors.WARNING}Você tem certeza que quer destruir a instância? (y/n) \n {bcolors.ENDC}")
 
-        if destruir_yes_no == "y" or "Y":
-            print("Ok, destruindo a instância" + "\n")
+        if destruir_yes_no == "y" or destruir_yes_no == "Y":
+            print("\n")
+            print(f"{bcolors.OKGREEN}Ok, destruindo a instância  {bcolors.ENDC}" + "\n")
             dict_variables["virtual_machines"].pop(str(instancia_destruir))
             for chave in dict_variables["sec_group_instances"].copy():
                 if instancia_destruir == chave:
                     del dict_variables["sec_group_instances"][str(instancia_destruir)]
 
-            # Se destruir instÂncia, destroi os security groups também?
             escreve_documento(dict_variables)
-        elif destruir_yes_no == "n" or "N":
-            print("Ok, então não destruiremos a instância" + "\n")
+        elif destruir_yes_no == "n" or destruir_yes_no == "N":
+            print("\n")
+            print(f"{bcolors.FAIL}Ok, então não destruiremos a instância {bcolors.FAIL}" + "\n")
 
     elif destruir == "2":
-        sec_group_destruir = input(""" Você escolheu destruir um grupo de segurança.
-        Digite o nome do grupo de segurança que você quer destruir: 
-        R: """)
+        sec_group_destruir = input(f"""{bcolors.OKCYAN}
+    Você escolheu destruir um grupo de segurança.
+    Digite o nome do grupo de segurança que você quer destruir: 
+    R: {bcolors.ENDC}""")
 
         regras = str(dict_variables["sec_groups"][str(sec_group_destruir)])
 
-        print(f'Você está prestes a destruir o grupo de segurança {sec_group_destruir}, que possui as seguintes regras: {regras} "\n" ')
+        print(f'{bcolors.WARNING}Você está prestes a destruir o grupo de segurança {sec_group_destruir}, que possui as seguintes regras: {regras} {bcolors.ENDC}"\n" ')
         
-        destruir_yes_no = input("""Você tem certeza que quer destruir o grupo de segurança? (y/n)
-        R: """)
+        destruir_yes_no = input(f"{bcolors.WARNING}Você tem certeza que quer destruir o grupo de segurança? Obs: destruir significa apagar todas as regras, EXCETO a padrão (y/n) R: {bcolors.ENDC}")
 
         while confere_resposta_nao_valida(destruir_yes_no):
-            destruir_yes_no = input("Você tem certeza que quer destruir o grupo de segurança? Obs: destruir significa apagar todas as regras, EXCETO a padrão (y/n)")
+            destruir_yes_no = input(f"{bcolors.WARNING}Você tem certeza que quer destruir o grupo de segurança? Obs: destruir significa apagar todas as regras, EXCETO a padrão (y/n) R: {bcolors.ENDC}")
 
-        if destruir_yes_no == "y" or "Y":
-            print("Ok, destruindo o grupo de segurança" + "\n")
+        if destruir_yes_no == "y" or destruir_yes_no == "Y":
+            print("\n")
+            print(f"{bcolors.OKGREEN}Ok, destruindo o grupo de segurança {bcolors.ENDC}" + "\n")
             
             size = len(dict_variables["sec_groups"][str(sec_group_destruir)]["ingress"])
             while size > 1:
@@ -573,21 +589,24 @@ def destruir_recurso():
                     size = size - 1
                     escreve_documento(dict_variables)
 
-        elif destruir_yes_no == "n" or "N":
-            print("Ok, então não destruiremos o grupo de segurança" + "\n")
+        elif destruir_yes_no == "n" or destruir_yes_no == "N":
+            print("\n")
+            print(f"{bcolors.FAIL}Ok, então não destruiremos o grupo de segurança {bcolors.ENDC}" + "\n")
 
     elif destruir == "3":
-        user_destruir = input("""Você escolheu destruir um usuário. 
-        Digite o nome do usuário que você quer destruir: """)
+        user_destruir = input(f""" {bcolors.OKCYAN}
+    Você escolheu destruir um usuário. 
+    Digite o nome do usuário que você quer destruir R: {bcolors.ENDC}""")
 
 
-        destruir_yes_no = input(f'Você está prestes a destruir o usuário {user_destruir}. Você tem certeza que quer destruir o usuário? (y/n). \n R: ')
+        destruir_yes_no = input(f'{bcolors.WARNING}Você está prestes a destruir o usuário {user_destruir}. Você tem certeza que quer destruir o usuário? (y/n). \n R: {bcolors.ENDC}')
 
         while confere_resposta_nao_valida(destruir_yes_no):
-            destruir_yes_no = input("Você tem certeza que quer destruir o usuário? (y/n)")
+            destruir_yes_no = input(f"{bcolors.WARNING}Você tem certeza que quer destruir o usuário? (y/n) {bcolors.ENDC}")
 
-        if destruir_yes_no == "y" or "Y":
-            print("Ok, destruindo o usuário" + "\n")
+        if destruir_yes_no == "y" or destruir_yes_no == "Y":
+            print("\n")
+            print(f"{bcolors.OKGREEN }Ok, destruindo o usuário {bcolors.ENDC}" + "\n")
             size = len(dict_users["aws_user_name"])
             for i in range(size):
                 if dict_users["aws_user_name"][i]["username"] == user_destruir:
@@ -597,45 +616,47 @@ def destruir_recurso():
                     os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
                     break
 
-        elif destruir_yes_no == "n" or "N":
-            print("Ok, então não destruiremos o usuário" + "\n")
+        elif destruir_yes_no == "n" or destruir_yes_no == "N":
+            print("\n")
+            print(f"{bcolors.FAIL}Ok, então não destruiremos o usuário {bcolors.ENDC}" + "\n")
 
     elif destruir == "4":
-        sec_group_destruir_regra = input("""Você escolheu destruir uma regra de um grupo de segurança. 
-        Digite o nome do grupo de segurança que você quer destruir a regra: 
-        R: """)
+        sec_group_destruir_regra = input(f"""{bcolors.OKCYAN}
+    Você escolheu destruir uma regra de um grupo de segurança. 
+    Digite o nome do grupo de segurança que você quer destruir a regra: 
+    R: {bcolors.ENDC}""")
 
         regras = dict_variables["sec_groups"][str(sec_group_destruir_regra)]
 
-        print(f'Você está prestes a destruir alguma regra do grupo de segurança {sec_group_destruir_regra}, que possui as seguintes regras:')
+        print(f'{bcolors.WARNING}Você está prestes a destruir alguma regra do grupo de segurança {sec_group_destruir_regra}, que possui as seguintes regras : {bcolors.ENDC} \n')
 
 
         for i in range(len(dict_variables["sec_groups"][str(sec_group_destruir_regra)]["ingress"])):
-            # mostrar apenas description, protocol, from_port, to_port, cidr_blocks
             topico = dict_variables["sec_groups"][str(sec_group_destruir_regra)]["ingress"][i]["ingress"]
+            print(f' {bcolors.WARNING} {i} - {topico["description"]}, {topico["protocol"]}, {topico["from_port"]}, {topico["to_port"]}, {topico["cidr_blocks"]} {bcolors.ENDC}')
 
-            print(f' {i} - {topico["description"]}, {topico["protocol"]}, {topico["from_port"]}, {topico["to_port"]}, {topico["cidr_blocks"]}')
+        print("\n")
+        regra_destruir = input(f'{bcolors.OKCYAN}Qual regra você quer destruir do grupo de segurança {sec_group_destruir_regra}? Digite o número da regra que você quer destruir R: \n {bcolors.ENDC}')
 
-        regra_destruir = input(f'Qual regra você quer destruir do grupo de segurança {sec_group_destruir_regra}? Digite o número da regra que você quer destruir:')
 
-
-        destruir_yes_no = input("""
-        Você tem certeza que quer destruir a regra {regra_destruir} do grupo de segurança? (y/n)
-        R: """)
+        destruir_yes_no = input(f"""{bcolors.WARNING}
+    Você tem certeza que quer destruir a regra {regra_destruir} do grupo de segurança? (y/n)
+    R: {bcolors.ENDC}""")
 
         while confere_resposta_nao_valida(destruir_yes_no):
-            destruir_yes_no = input("Você tem certeza que quer destruir a regra {regra_destruir} do grupo de segurança? (y/n)")
+            destruir_yes_no = input(f"{bcolors.WARNING}Você tem certeza que quer destruir a regra {regra_destruir} do grupo de segurança? (y/n) {bcolors.ENDC}")
 
-        if destruir_yes_no == "y" or "Y":
-            print("Ok, destruindo a regra do grupo de segurança" + "\n")
+        if destruir_yes_no == "y" or destruir_yes_no == "Y":
+            print("\n")
+            print(f"{bcolors.OKGREEN}Ok, destruindo a regra do grupo de segurança {bcolors.ENDC}" + "\n")
             dict_variables["sec_groups"][str(sec_group_destruir_regra)]["ingress"].pop(int(regra_destruir))
             escreve_documento(dict_variables)
-        elif destruir_yes_no == "n" or "N":
-            print("Ok, então não destruiremos a regra do grupo de segurança" + "\n")
+        elif destruir_yes_no == "n" or destruir_yes_no == "N":
+            print("\n")
+            print(f"{bcolors.FAIL}Ok, então não destruiremos a regra do grupo de segurança {bcolors.ENDC}" + "\n")
 
 
 def listar_recursos():
-    print("Mas antes vamos garantir que o programa está atualizado... Aguarde um momento")
     global region
 
     session = boto3.Session(profile_name='default', region_name=region)
@@ -644,34 +665,44 @@ def listar_recursos():
     ec2re = session.resource('ec2')
 
 
-    escolha_listar = input("""Você quer listar:
-    1- Instâncias e suas regiões;
-    2- Grupos de segurança e suas regras;
-    3- Usuários? """)
+    escolha_listar = input(f""" {bcolors.OKCYAN}
+    Você quer listar:
+        1- Instâncias e suas regiões;
+        2- Grupos de segurança e suas regras;
+        3- Usuários? 
+        R : {bcolors.ENDC}""")
 
     while confere_se_eh_numero(escolha_listar):
-        escolha_listar = input("Você quer listar: 1- Instâncias e suas regiões; 2- Grupos de segurança e suas regras; 3- Usuários? ")
+        escolha_listar = input(f""" {bcolors.OKCYAN}
+    Você quer listar: 
+        1- Instâncias e suas regiões; 
+        2- Grupos de segurança e suas regras; 
+        3- Usuários? {bcolors.ENDC}""")
 
     if escolha_listar == "1":
-        print("Você escolheu listar instâncias e suas regiões" + "\n")
+        print("\n")
+        print(f"{bcolors.OKCYAN}Você escolheu listar instâncias e suas regiões {bcolors.ENDC}" + "\n")
 
         for each in ec2re.instances.all():
-            print("Id: " + each.id + " " + "| Nome: " + each.tags[0]["Value"] + " " + "| Estado: " + each.state["Name"] + " " +
-            "| Tipo: " + each.instance_type +  "| Região: "+  each.placement['AvailabilityZone'] + "\n")
+            print(f"{bcolors.OKGREEN} Id: " + each.id + " " + "| Nome: " + each.tags[0]["Value"] + " " + "| Estado: " + each.state["Name"] + " " +
+            "| Tipo: " + each.instance_type +  "| Região: "+  each.placement['AvailabilityZone'] + "\n " + f"{bcolors.ENDC}")
 
 
     elif escolha_listar == "2":
-        print("Você escolheu listar grupos de segurança e suas regras" )
+        print("\n")
+        print(f"{bcolors.OKCYAN}Você escolheu listar grupos de segurança e suas regras {bcolors.ENDC}" )
         for each in ec2re.security_groups.all():
-            print("Nome: " + each.group_name + "\n")
+            print(f"{bcolors.OKGREEN}Nome: " + each.group_name + "\n")
             for rule in each.ip_permissions:
-                print("Regra: " + str(rule) + "\n")
-                print("=================================================================================================")
+                print(f"{bcolors.OKGREEN}Regra: " + str(rule) + "\n")
+                print(f"================================================================================================= {bcolors.ENDC}")
          
 
     elif escolha_listar == "3":
-        print("Você escolheu listar usuários" )
+        print("\n")
+        print(f"{bcolors.OKCYAN}Você escolheu listar usuários {bcolors.ENDC}" )
         for user in ec2iam.list_users()['Users']:
+            print(f"{bcolors.OKGREEN}")
             print("Usuário: {0}\ID: {1}\nARN: {2}\Criado em: {3}\n".format(
                 user['UserName'],
                 user['UserId'],
@@ -679,10 +710,13 @@ def listar_recursos():
                 user['CreateDate']
                 )
             )
+            print(f"{bcolors.ENDC}")
 
 def aplicar_alteracoes():
     global documento
     documento = f'.auto-{region}.tfvars.json'
+
+    print(f"{bcolors.OKGREEN} Aplicando as mudanças feitas até aqui na região atual : {region} {bcolors.ENDC}" + "\n")
 
     os.system("source ~/.bashrc")
 
@@ -690,18 +724,11 @@ def aplicar_alteracoes():
 
     os.system(f'cd terraform-{region} && terraform init && terraform  plan -var-file={documento} && terraform apply -var-file={documento}')
 
-    # os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
-
-    # os.system("terraform init")
-    # os.system(f'terraform terraform plan -var-file={documento}')
-    # os.system(f'terraform apply -var-file={documento}')
-
-    # os.system("cd ..")
-
 
 def main():
 
-    print("Olá caro usuário, seja bem vindo ao nosso projeto de automação de infraestrutura" + "\n")
+    print("\n")
+    print(f"{bcolors.OKCYAN}{bcolors.BOLD}Olá caro usuário, seja bem vindo ao nosso projeto de automação de infraestrutura {bcolors.ENDC}" + "\n")
 
     info_basicas()
 
@@ -710,7 +737,7 @@ def main():
 
     programa_on = True
     while programa_on:
-        primeira_resposta = input("""Primeiramente, você gostaria de :
+        primeira_resposta = input(f"""{bcolors.OKCYAN}Primeiramente, você gostaria de :
         
         0 - Manual de uso da aplicação; 
         1 - Iniciar uma instância existente;
@@ -723,40 +750,40 @@ def main():
         8 - Mudar a região onde você está trabalhando;
         9 - Sair do programa
         
-        R: """)
+        R: {bcolors.ENDC}""")
 
 
         if primeira_resposta == "0":
-            print("Você escolheu manual de uso da aplicação" + "\n")
+            print(f"{bcolors.OKCYAN}Você escolheu manual de uso da aplicação {bcolors.ENDC}" + "\n")
             manual_uso()
         elif primeira_resposta == "1":
-            print("Você escolheu iniciar uma instância existente" + "\n")
-            region = input("Digite a região da instância que você quer iniciar: ")
+            print(f"{bcolors.OKCYAN}Você escolheu iniciar uma instância existente {bcolors.ENDC}" + "\n")
+            region = input(f"{bcolors.OKGREEN}Digite a região da instância que você quer iniciar: {bcolors.ENDC}")
             lambda_handler_inicia(None, None, region)
         elif primeira_resposta == "2":
-            print("Você escolheu parar uma instância existente" + "\n")
-            region = input("Digite a região da instância que você quer parar: ")
+            print(f"{bcolors.OKCYAN}Você escolheu parar uma instância existente {bcolors.ENDC}" + "\n")
+            region = input(f"{bcolors.OKGREEN}Digite a região da instância que você quer parar: {bcolors.ENDC}")
             lambda_handler_para(None, None, region)
         elif primeira_resposta == "3":
-            print("Você escolheu criar uma nova instância" + "\n")
-            create_instances()
+            print(f"{bcolors.OKCYAN}Você escolheu criar uma nova instância {bcolors.ENDC}" + "\n")
+            criar_instancias()
         elif primeira_resposta == "4":
-            print("Você escolheu destruir algum recurso" + "\n")
+            print(f"{bcolors.OKCYAN}Você escolheu destruir algum recurso {bcolors.ENDC}" + "\n")
             destruir_recurso()
         elif primeira_resposta == "5":
-            print("Você escolheu listar recursos" + "\n")
+            print(f"{bcolors.OKCYAN}Você escolheu listar recursos {bcolors.ENDC}" + "\n")
             listar_recursos()
         elif primeira_resposta == "6":
-            print("Você escolheu criar um usuário" + "\n")
+            print(f"{bcolors.OKCYAN}Você escolheu criar um usuário {bcolors.ENDC}" + "\n")
             criar_usuario()
         elif primeira_resposta == "7":
-            print("Você escolheu aplicar todas alterações feitas nessa região {region}" + "\n")
+            print(f"{bcolors.OKCYAN}Você escolheu aplicar todas alterações feitas nessa região {region} {bcolors.ENDC}" + "\n")
             aplicar_alteracoes()
         elif primeira_resposta == "8":
             mudar_regiao()
         elif primeira_resposta == "9":
-            print("Você escolheu sair do programa" + "\n")
-            print("Obrigado por usar o nosso programa, volte sempre!" + "\n")
+            print(f"{bcolors.OKCYAN}Você escolheu sair do programa" + "\n")
+            print(f"Obrigado por usar o nosso programa, volte sempre!{bcolors.ENDC}" + "\n")
             programa_on = False
             return
 
