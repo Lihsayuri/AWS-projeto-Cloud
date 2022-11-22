@@ -732,6 +732,7 @@ def main():
 
     info_basicas()
 
+    global region
     global dict_users
     escreve_usuario(dict_users)
 
