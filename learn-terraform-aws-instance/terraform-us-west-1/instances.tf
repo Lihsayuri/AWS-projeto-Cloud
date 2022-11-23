@@ -8,7 +8,7 @@ resource "aws_instance" "app_server" {
 
   tags = {
     Name = "IdGroup-${each.key}"
-    Owner = "${var.aws_user_name}"
+    # Owner = "${var.aws_user_name}"
   }
 
 #   depends_on = [aws_key_pair.my_key]

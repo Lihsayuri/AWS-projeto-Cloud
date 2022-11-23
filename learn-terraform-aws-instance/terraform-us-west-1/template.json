@@ -1,3 +1,8 @@
+ami-0c09c7eb16d3e8e70 --- us-west-2
+
+ACHO Q ESSE AGORA VAI:
+
+
 {
     "virtual_machines": {
         "vm1": {
@@ -80,7 +85,7 @@
                 },
                 {
                     "ingress": {
-                        "description": "httpa",
+                        "description": "https",
                         "from_port": "443",
                         "to_port": "443",
                         "protocol": "tcp",
@@ -97,60 +102,84 @@
         }
     },
     "sec_group_instances": {
-        "vm1": {
-            "sec_names": [
-                "ssh-http"
-            ]
-        },
         "vm2": {
             "sec_names": [
                 "ssh-http",
                 "https"
             ]
+        },
+        "vm1": {
+            "sec_names": [
+                "ssh-http"
+            ]
         }
     },
     "aws_region": "us-east-1",
-    "aws_user_name": "teste",
-    "policy_name": "ReadWriteAccess",
-    "policy_description": "Descrever, listar e criar recursos",
-    "policy_action": [
-        "ec2:Describe*",
-        "ec2:Get*",
-        "ec2:Create*",
-        "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
-        "ec2:ModifySecurityGroupRules",
-        "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
-        "ec2:AuthorizeSecurityGroupIngress",
-        "ec2:RevokeSecurityGroupIngress",
-        "ec2:AuthorizeSecurityGroupEgress",
-        "ec2:RevokeSecurityGroupEgress",
-        "ec2:RunInstances"
-    ],
-    "policy_effect": "Allow",
-    "policy_resource": "*",
+    "aws_user_name": [
+        {
+            "username": "testenumero1",
+            "policy_name": "FullAccess",
+            "policy_description": "Usuario possui acesso a tudo",
+            "policy_action": [
+                "*"
+            ],
+            "policy_resource": "*",
+            "policy_effect": "Allow"
+            
+        },
+        {
+            "username": "testenumero2",
+            "policy_name": "ReadWriteAccess_testenumero2",
+            "policy_description": "Descrever, listar e criar recursos",
+            "policy_action": [
+                "ec2:Describe*",
+                "ec2:Get*",
+                "ec2:Create*",
+                "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+                "ec2:ModifySecurityGroupRules",
+                "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:RunInstances"
+            ],
+            "policy_resource": "*",
+            "policy_effect": "Allow"
+            
+        },
+        {
+            "username": "testenumero3",
+            "policy_name": "ReadOnlyAccess_testenumero3",
+            "policy_description": "Descrever e listar recursos",
+            "policy_action": [
+                "ec2:Describe*",
+                "ec2:Get*"
+            ],
+            "policy_resource": "*",
+            "policy_effect": "Allow"
+        }
+            
+        
+        ],
     "vpc_cidr_block": "10.0.0.0/16"
 }
 
-
-ami-0c09c7eb16d3e8e70 --- us-west-2
-
----------------------------------------------------------------------------------------
-
-
+----------------------------------------------------------
 {
     "virtual_machines": {
         "vm3": {
-            "image_id": "ami-0c09c7eb16d3e8e70",
+            "image_id": "ami-03f6d497fceb40069",
             "instance_type": "t2.micro"
         },
         "vm4": {
-            "image_id": "ami-0c09c7eb16d3e8e70",
-            "instance_type": "t2.small"
+            "image_id": "ami-03f6d497fceb40069",
+            "instance_type": "t2.micro"
         }
     },
     "sec_groups": {
-        "ssh-http-wes": {
-            "name": "ssh-http-wes",
+        "ssh-http": {
+            "name": "ssh-http",
             "ingress": [
                 {
                     "ingress": {
@@ -169,7 +198,7 @@ ami-0c09c7eb16d3e8e70 --- us-west-2
                 },
                 {
                     "ingress": {
-                        "description": "ssh",
+                        "description": "ssh libera",
                         "from_port": "22",
                         "to_port": "22",
                         "protocol": "tcp",
@@ -184,7 +213,7 @@ ami-0c09c7eb16d3e8e70 --- us-west-2
                 },
                 {
                     "ingress": {
-                        "description": "http",
+                        "description": "http libera",
                         "from_port": "80",
                         "to_port": "80",
                         "protocol": "tcp",
@@ -199,8 +228,8 @@ ami-0c09c7eb16d3e8e70 --- us-west-2
                 }
             ]
         },
-        "ssh-only-wes": {
-            "name": "ssh-only-wes",
+        "https-apenas": {
+            "name": "https-apenas",
             "ingress": [
                 {
                     "ingress": {
@@ -219,9 +248,9 @@ ami-0c09c7eb16d3e8e70 --- us-west-2
                 },
                 {
                     "ingress": {
-                        "description": "ssh",
-                        "from_port": "22",
-                        "to_port": "22",
+                        "description": "https libera",
+                        "from_port": "443",
+                        "to_port": "443",
                         "protocol": "tcp",
                         "ipv6_cidr_blocks": null,
                         "prefix_list_ids": null,
@@ -236,33 +265,62 @@ ami-0c09c7eb16d3e8e70 --- us-west-2
         }
     },
     "sec_group_instances": {
-        "vm4": {
-            "sec_names": [
-                "ssh-http-wes",
-                "ssh-only-wes"
-            ]
-        },
         "vm3": {
             "sec_names": [
-                "ssh-http-wes"
+                "ssh-http"
+            ]
+        },
+        "vm4": {
+            "sec_names": [
+                "ssh-http",
+                "https-apenas"
             ]
         }
     },
-    "aws_region": "us-west-2",
-    "aws_user_name": "teste2",
-    "policy_name": "ReadWriteAccess",
-    "policy_description": "Descrever, listar e criar recursos",
-    "policy_action":  ["ec2:Describe*",
-                        "ec2:Get*",
-                        "ec2:Create*",
-                        "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
-                        "ec2:ModifySecurityGroupRules",
-                        "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
-                        "ec2:AuthorizeSecurityGroupIngress", 
-                        "ec2:RevokeSecurityGroupIngress", 
-                        "ec2:AuthorizeSecurityGroupEgress", 
-                        "ec2:RevokeSecurityGroupEgress",
-                        "ec2:RunInstances"],
-    "policy_effect": "Allow",
-    "policy_resource" : "*"
+    "aws_region": "us-west-1",
+    "aws_user_name": [
+        {
+            "username": "testenumero2",
+            "policy_name": "ReadWriteAccess_testenumero2",
+            "policy_description": "Descrever, listar e criar recursos",
+            "policy_action": [
+                "ec2:Describe*",
+                "ec2:Get*",
+                "ec2:Create*",
+                "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+                "ec2:ModifySecurityGroupRules",
+                "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:RunInstances"
+            ],
+            "policy_resource": "*",
+            "policy_effect": "Allow"
+        },
+        {
+            "username": "testenumero3",
+            "policy_name": "ReadOnlyAccess_testenumero3",
+            "policy_description": "Descrever e listar recursos",
+            "policy_action": [
+                "ec2:Describe*",
+                "ec2:Get*"
+            ],
+            "policy_resource": "*",
+            "policy_effect": "Allow"
+        },
+        {
+            "username": "testenumero1",
+            "policy_name": "ReadOnlyAccess_testenumero1",
+            "policy_description": "Descrever e listar recursos",
+            "policy_action": [
+                "ec2:Describe*",
+                "ec2:Get*"
+            ],
+            "policy_resource": "*",
+            "policy_effect": "Allow"
+        }
+    ],
+    "vpc_cidr_block": "172.16.0.0/16"
 }

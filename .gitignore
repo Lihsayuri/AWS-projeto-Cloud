@@ -30,3 +30,5 @@ override.tf.json
 
 learn-terraform-aws-instance/file.txt
 learn-terraform-aws-instance/test.txt
+file.txt
+test.txt
