@@ -27,22 +27,22 @@ resource "aws_vpc" "main" {
   }
 }
 
-# # Subnet publica
-# resource "aws_subnet" "main" {
-#   vpc_id     = aws_vpc.main.id
-#   #cidr_block =  aws_vpc.main.cidr_block             #"172.16.1.0/24"
-#   # divide o cidr em 3 blocos
-#   cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, 1)  # Pega o cidr do block da vpc e divide em 2
-#   map_public_ip_on_launch = true
+# Subnet publica
+resource "aws_subnet" "main" {
+  vpc_id     = aws_vpc.main.id
+  #cidr_block =  aws_vpc.main.cidr_block             #"172.16.1.0/24"
+  # divide o cidr em 3 blocos
+  cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, 1)  # Pega o cidr do block da vpc e divide em 2
+  map_public_ip_on_launch = true
 
-#   tags = {
-#     Name = "Subnet"
-#   }
-# }
+  tags = {
+    Name = "Subnet"
+  }
+}
 
 
 resource "aws_subnet" "private" {
-  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, 1)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, 3)
   availability_zone       = data.aws_availability_zones.available.names[0]
   vpc_id                  = aws_vpc.main.id
   map_public_ip_on_launch = true

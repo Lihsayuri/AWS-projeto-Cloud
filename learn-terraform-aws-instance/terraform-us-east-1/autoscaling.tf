@@ -1,9 +1,10 @@
 
 resource "aws_launch_configuration" "teste" {
   name_prefix     = "learn-terraform-aws-asg-"
-  image_id        = "ami-08dc32339a1415ca1"
+  image_id        = "ami-0fb0bb0be0c875fa5"
   instance_type   = "t2.micro"
-#   user_data       = file("user-data.sh")
+  key_name = "livia_certo"
+  user_data       = file("user-data.sh")
   security_groups = [aws_security_group.teste_instance.id]
 
   lifecycle {
@@ -68,6 +69,21 @@ resource "aws_security_group" "teste_instance" {
     security_groups = [aws_security_group.teste_lb.id]
   }
 
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port       = 0
     to_port         = 0
@@ -86,6 +102,15 @@ resource "aws_security_group" "teste_lb" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
 
   egress {
     from_port   = 0
@@ -94,5 +119,64 @@ resource "aws_security_group" "teste_lb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   vpc_id = aws_vpc.main.id
+}
+
+
+resource "aws_autoscaling_policy" "scale_down" {
+  name                   = "terramino_scale_down"
+  autoscaling_group_name = aws_autoscaling_group.teste.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = -1
+  cooldown               = 120
+}
+
+resource "aws_cloudwatch_metric_alarm" "scale_down" {
+  alarm_description   = "Monitors CPU utilization for Terramino ASG"
+  alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
+  alarm_name          = "teste_scale_down"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  namespace           = "AWS/EC2"
+  metric_name         = "CPUUtilization"
+  threshold           = "10"
+  evaluation_periods  = "2"
+  period              = "120"
+  statistic           = "Average"
+
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.teste.name
+  }
+}
+
+
+resource "aws_autoscaling_policy" "scale_up" {
+  name                   = "terramino_scale_up"
+  autoscaling_group_name = aws_autoscaling_group.teste.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = 1
+  cooldown               = 120
+}
+
+resource "aws_cloudwatch_metric_alarm" "scale_up" {
+  alarm_description   = "Monitors CPU utilization for Terramino ASG"
+  alarm_actions       = [aws_autoscaling_policy.scale_up.arn]
+  alarm_name          = "teste_scale_up"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  namespace           = "AWS/EC2"
+  metric_name         = "CPUUtilization"
+  threshold           = "50"
+  evaluation_periods  = "2"
+  period              = "120"
+  statistic           = "Average"
+
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.teste.name
+  }
 }
