@@ -121,12 +121,14 @@ aws_secret_access_key=<sua_secret_access_key>
 
 Com tudo isso feito, confira que seu usuário possui todas as permissões de administrador, é isso que irá possibilitar você criar, listar e deletar recursos em diferentes regiões. Para isso, comece acessando o console:
 
-[colocar imagem do console]
+
+![WhatsApp Image 2022-11-24 at 21 33 51](https://user-images.githubusercontent.com/62647438/203878313-dad61a6c-53d3-435f-93c4-2c3bdfe6cb81.jpeg)
 
 
 Feito isso, acesse a aba do IAM e encontre o seu usuário. Feito isso, clique nele e confira se você possui a permissão de administrador, como pode ser visto abaixo:
 
-[colocar outra imagem]
+
+![WhatsApp Image 2022-11-24 at 21 33 35](https://user-images.githubusercontent.com/62647438/203878325-547cab91-aa01-4bd3-b9d2-83ffd090226d.jpeg)
 
 
 Pronto, agora sim vamos à aplicação.
@@ -144,7 +146,8 @@ Entre na pasta learn-terraform-aws-instance e abra o documento main_project.py e
 
 Depois é só rodar o código e ir respondendo as questões perguntadas no próprio terminal. A seguinte tela deverá ser vista por você:
 
-[imagem]
+![WhatsApp Image 2022-11-24 at 21 36 40](https://user-images.githubusercontent.com/62647438/203878531-235f3c0e-8a71-4a97-aa30-ba5ccb7db613.jpeg)
+
 
 Você poderá escolher entre as seguintes opções no menu:
 
