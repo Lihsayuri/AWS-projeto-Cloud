@@ -198,7 +198,7 @@ def criar_restricoes():
         escreve_usuario(dict_users)
 
 
-    os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+    # os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
 
 
 def criar_usuario():
@@ -229,7 +229,7 @@ def criar_usuario():
         escreve_usuario(dict_users)
         print(f"{bcolors.OKGREEN} Ok, vamos continuar então {bcolors.ENDC}" + "\n")
         
-        os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+        # os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
 
 def info_basicas():
     global region
@@ -339,7 +339,7 @@ def cria_sec_group():
         security_group_name = input(f"{bcolors.OKCYAN}Digite o nome do grupo de segurança número {i}: {bcolors.ENDC}")
         print("\n")
 
-        qtd_rules = input(f"{bcolors.OKCYAN}Quantas regras você quer criar para esse grupo de segurança? {bcolors.ENDC}")
+        qtd_rules = input(f"{bcolors.OKCYAN}Quantas regras você quer criar para esse grupo de segurança? {bcolors.ENDC}" + "\n")
 
         dict_standard_rule = {"ingress" : {"description" : "Allow inbound traffic", \
                             "from_port" : 0, \
@@ -382,7 +382,7 @@ def cria_sec_group():
 
         flag = True
         while flag:
-            nome_inst_sec = input(f"{bcolors.OKCYAN} Não menos importante, qual(ou quais) instância(s) você quer associar a esse grupo de segurança?{bcolors.ENDC}")
+            nome_inst_sec = input(f"{bcolors.OKCYAN} Não menos importante, qual(ou quais) instância(s) você quer associar a esse grupo de segurança? Dê a sua resposta com vírgula, exemplo: vm1,vm2.  R:{bcolors.ENDC}")
 
             instancias = list(set(nome_inst_sec.split(",")))
 
@@ -613,7 +613,7 @@ def destruir_recurso():
                     dict_users["aws_user_name"].pop(i)
                     size = size - 1
                     escreve_usuario(dict_users)
-                    os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
+                    # os.system(f'cd terraform-users && terraform init && terraform  plan && terraform apply')
                     break
 
         elif destruir_yes_no == "n" or destruir_yes_no == "N":
