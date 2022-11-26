@@ -4,7 +4,7 @@ resource "aws_launch_configuration" "teste" {
   image_id        = "ami-0fb0bb0be0c875fa5"
   instance_type   = "t2.micro"
   key_name = "livia_certo"
-  user_data       = file("user-data.sh")
+  # user_data       = file("user-data.sh")
   security_groups = [aws_security_group.teste_instance.id]
 
   lifecycle {
@@ -49,7 +49,7 @@ resource "aws_lb_listener" "teste" {
 
 resource "aws_lb_target_group" "teste" {
   name     = "learn-asg-teste"
-  port     = 80
+  port     = 8080
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
 }
@@ -63,8 +63,8 @@ resource "aws_autoscaling_attachment" "teste" {
 resource "aws_security_group" "teste_instance" {
   name = "learn-asg-teste-instance"
   ingress {
-    from_port       = 80
-    to_port         = 80
+    from_port       = 8080
+    to_port         = 8080
     protocol        = "tcp"
     security_groups = [aws_security_group.teste_lb.id]
   }
@@ -85,6 +85,14 @@ resource "aws_security_group" "teste_instance" {
   }
 
   egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  egress {
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
@@ -102,27 +110,12 @@ resource "aws_security_group" "teste_lb" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 

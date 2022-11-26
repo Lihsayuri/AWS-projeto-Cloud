@@ -1,4 +1,4 @@
-# AWS-projeto-Cloud <img src="https://img.shields.io/static/v1?label=B&message=Finalizado&color=success&style=flat-square&logo=ghost"/>
+# AWS-projeto-Cloud <img src="https://img.shields.io/static/v1?label=A&message=Finalizado&color=success&style=flat-square&logo=ghost"/>
 
 ## Feito por :raising_hand_woman:
 
@@ -34,7 +34,7 @@
 
 ## Conceito A
 
-- Criar um HA de servidores web (ainda em execução). Mas já é criado um load balancer, um autoscaling group e uma launch configuration.
+- Criar um HA de servidores web :heavy_check_mark: 
 
 
 ## Objetivo do projeto :round_pushpin: :
@@ -335,7 +335,15 @@ Para criar os usuários, foi criada uma pasta separada com recursos e dados apen
 
 Toda vez que você criar um usuário e aplicar as mudanças, como output você verá a senha informações e a senha de acesso ao console da AWS desse usuário criado. 
 
+### High Availability
 
+Por fim, foi implementada alta disponibilidade para servidores web na região us-east-1. Dessa forma, quando uma instância com a imagem criada por mim for lançada, se o seu consumo de CPU chegar a 50% em média, em cerca de 2 minutos uma nova instância será criada. E caso isso ocorra novamente, mais outra instância será lançada - isso porque configurei no máximo 3 instâncias para suprir a necessidade na aplicação. Além disso, se depois de 2 minutos a média de consumo for menor que 10%, essas instâncias serão desligadas. Isso pode ser testado com um teste de stress que pode ser feito com o seguinte comando após ter acessada a instância via ssh:
+
+`stress --cpu 8 --timeout 300`
+
+Isso é possível pois o load balancer aponta para um grupo - o target group- que foi definido com as instâncias. Dessa forma, através de alarmes que estarão monitorando o uso da CPU, conforme o limite seja atingido (tanto acima quanto abaixo), ele executará uma `policy` configurada que irá criar ou desligar as instâncias. E quando ela for criada, ela utilizará como imagem um template criado por mim que já possui uma simples aplicação web-server só para testes, além de já possuir o módulo `stress` instalado. Lembrando que para cada recurso as portas certas foram liberadas para permitir o acesso à aplicação e ao ssh. 
+
+**Atenção: o teste demora um pouco, mais está funcionando :) e isso foi implementado apenas para a região us-east-1** 
 
 ## Vídeo com exemplo de funcionamento :movie_camera: :camera:
 
