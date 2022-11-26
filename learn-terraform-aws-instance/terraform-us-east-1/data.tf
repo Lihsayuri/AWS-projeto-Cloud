@@ -3,4 +3,5 @@ data "aws_instances" "instances" {
 
 }
 
+data "aws_availability_zones" "available" {}
 
