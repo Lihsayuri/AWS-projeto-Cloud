@@ -345,9 +345,6 @@ Isso é possível pois o load balancer aponta para um grupo - o target group- qu
 
 **Atenção: o teste demora um pouco, mais está funcionando :) e isso foi implementado apenas para a região us-east-1** 
 
-## Vídeo com exemplo de funcionamento :movie_camera: :camera:
-
-[a ser gravado]
 
 ## Notas finais :bookmark:
 
@@ -356,5 +353,6 @@ Quaisquer dúvidas sobre o código ou a aplicação, entrar em contato com @Lihs
 
 ## Referências:
 
-- Terraform (documentação e exemplos de códigos)
+- Terraform (documentação e exemplos de códigos);
+- Roteiros de aula e os professores: Rodolfo Avelino e Tiago Demay.
 
