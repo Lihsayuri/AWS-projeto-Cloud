@@ -341,9 +341,9 @@ Por fim, foi implementada alta disponibilidade para servidores web na região us
 
 `stress --cpu 8 --timeout 300`
 
-Isso é possível pois o load balancer aponta para um grupo - o target group- que foi definido com as instâncias. Dessa forma, através de alarmes que estarão monitorando o uso da CPU, conforme o limite seja atingido (tanto acima quanto abaixo), ele executará uma `policy` configurada que irá criar ou desligar as instâncias. E quando ela for criada, ela utilizará como imagem um template criado por mim que já possui uma simples aplicação web-server só para testes, além de já possuir o módulo `stress` instalado. Lembrando que para cada recurso as portas certas foram liberadas para permitir o acesso à aplicação e ao ssh. 
+Isso é possível pois o load balancer aponta para um grupo - o target group- que foi definido com as instâncias. Dessa forma, através de alarmes que estarão monitorando o uso da CPU, conforme o limite seja atingido (tanto acima quanto abaixo), ele executará uma `policy` configurada que irá criar ou desligar as instâncias. E quando ela for criada, ela utilizará como imagem um template criado por mim que já possui uma simples aplicação web-server só para testes - que sempre será executada quando a instância for acessada (isso foi feito por meio do comando `crontab`) - , além de já possuir o módulo `stress` instalado. Lembrando que para cada recurso as portas certas foram liberadas para permitir o acesso à aplicação e ao ssh. 
 
-**Atenção: o teste demora um pouco, mais está funcionando :) e isso foi implementado apenas para a região us-east-1** 
+**Atenção: o teste demora um pouco, mas está funcionando :) e isso foi implementado apenas para a região us-east-1 no arquivo `autoscaling.tf`** 
 
 
 ## Notas finais :bookmark:
