@@ -1,11 +1,11 @@
 # AWS-projeto-Cloud <img src="https://img.shields.io/static/v1?label=A&message=Finalizado&color=success&style=flat-square&logo=ghost"/>
 
-## Feito por :raising_hand_woman:
+## Created by :raising_hand_woman:
 
 - Lívia Sayuri Makuta.
 
 
-## Linguagem, ferramenta e plataforma utilizadas:
+## Languages, Tools, and Platforms Used:
 
 - <img src="https://img.shields.io/static/v1?label=Code&message=Python&color=blue&style=plastic&labelColor=black&logo=python"/>
 
@@ -14,49 +14,49 @@
 - <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white"/>
 
 
-## Conceito C
+## Concept C
 
-- Implementar criação automática de VPC e sub-rede :heavy_check_mark:
-- Listar instâncias e regiões, usuários e security_groups com regras :heavy_check_mark:
-- Parar e iniciar instâncias :heavy_check_mark:
-- Criação de instâncias e pelo menos 2 tipos de hosts :heavy_check_mark:
-- Criação de security groups padrões e associação a instâncias :heavy_check_mark:
-- Criação de usuário no IAM :heavy_check_mark:
-- Deletar usuários, instâncias e security groups :heavy_check_mark:
+- Implement automatic creation of VPC and subnets :heavy_check_mark:
+- List instances and regions, users, and security groups with rules :heavy_check_mark:
+- Stop and start instances :heavy_check_mark:
+- Create instances with at least 2 types of hosts :heavy_check_mark:
+- Create default security groups and associate them with instances :heavy_check_mark:
+- Create users in IAM :heavy_check_mark:
+- Delete users, instances, and security groups :heavy_check_mark:
 
-## Conceito B
+## Concept B
 
-- Regras personalizadas em security groups :heavy_check_mark:
-- Instâncias em mais de uma região (us-east-1 e us-west-1) :heavy_check_mark:
-- Associar restrições a usuários (apenas consultar, apenas consultar e criar e apenas consultar, criar e deletar) :heavy_check_mark:
-- Deletar regras em security groups :heavy_check_mark:
-
-
-## Conceito A
-
-- Criar um HA de servidores web :heavy_check_mark: 
+- Custom rules in security groups :heavy_check_mark:
+- Instances in multiple regions (us-east-1 and us-west-1) :heavy_check_mark:
+- Associate restrictions to users (read-only, read/create, and read/create/delete) :heavy_check_mark:
+- Delete rules in security groups :heavy_check_mark:
 
 
-## Objetivo do projeto :round_pushpin: :
+## Concept A
 
-O objetivo do projeto é facilitar e automatizar a criação de uma infraestrutura em nuvem utilizando como provedora a AWS (Amazon Web Services). E, para fazer
-essa automatização funcionar, a ferramenta do Terraform foi integrada com Python. Dessa forma, é no Python que o usuário irá escolher suas preferências em relação à região da AWS em que irá mexer, quais instâncias irá criar, seus security groups, entre outros, enquanto o Terraform é responsável por subir tudo aquilo que o usuário estiver demandando.
+- Create a highly available web server setup :heavy_check_mark: 
 
 
-## O que é o Terraform? :thinking:
+## Project Objective :round_pushpin: :
 
-Antes é importante que alguns tópicos sejam esclarecidos:
-- O Terraform é uma ferramenta open source que permite criar e alterar partes da infraestrutura em nuvem através de blocos de código, o que abrange o conceito de infraestrutura como código (IaC : "Infrastructure as code"). 
-- Além disso, possui uma linguagem declarativa, ou seja, o usuário descreve exatamente como ele quer os recursos, como por exemplo uma máquina, mas não sabe exatamente como essa máquina será provisionada. 
-- Cada vez que é executado, o Terraform gera planos de execução que descrevem o que será feito para atingir aquilo que foi pedido pelo projetista da arquitetura, o que é extremamente útil para ter ambientes que possam ser reproduzidos depois.
+The objective of this project is to facilitate and automate the creation of cloud infrastructure using AWS (Amazon Web Services) as the provider. To make this automation work, the Terraform tool was integrated with Python. This way, the user can choose their preferences regarding the AWS region, which instances to create, security groups, among others, while Terraform is responsible for provisioning everything the user demands.
 
-## Pré-requisitos :heavy_check_mark:
 
-Antes de começar a entender como o projeto foi desenvolvido, primeiro é necessário que algumas instalações e configurações sejam feitas. A começar pela instação do Terraform. Como todo o projeto foi desenvolvido no ambiente do **Ubuntu 20.04 LTS**, os comandos que serão citados ao decorrer desse tutorial são mais voltados a este sistema operacional. 
+## What is Terraform? :thinking:
 
-### Instalação do Terraform
+It’s important to clarify a few points:
 
-Assim, para **instalar o terraform**, crie uma pasta que será a pasta usada para o projeto, abra o terminal e rode os seguintes comandos:
+- Terraform is an open-source tool that allows you to create and modify parts of cloud infrastructure through code blocks, encompassing the concept of Infrastructure as Code (IaC).
+- Additionally, it has a declarative language, meaning the user describes exactly how they want the resources (e.g., a machine) without needing to know how that machine will be provisioned.
+- Every time it runs, Terraform generates execution plans that describe what will be done to achieve what the architect of the infrastructure requested, which is extremely useful for creating reproducible environments later.
+
+## Prerequisites :heavy_check_mark:
+
+Before starting to understand how the project was developed, certain installations and configurations need to be made. First, install Terraform. Since the entire project was developed on **Ubuntu 20.04 LTS**, the commands mentioned throughout this tutorial are geared towards this operating system.
+
+### Installing Terraform
+
+To **install Terraform**, create a directory for the project, open the terminal, and run the following commands:
 
 `sudo apt-get update && sudo apt-get install -y gnupg software-properties-common`
 
@@ -70,23 +70,23 @@ Assim, para **instalar o terraform**, crie uma pasta que será a pasta usada par
 
 `sudo apt-get install terraform`
 
-Para mais detalhes sobre o que faz cada comando, consultar o site do terraform da qual o tutorial foi retirado: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli. 
+For more details on what each command does, consult the Terraform installation tutorial: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli. 
 
-### Instalação do CLI da AWS e do boto3 
+### Installing AWS CLI and Boto3
 
-Além disso, também é recomendado **baixar a interface de linhas de comando (CLI) da AWS**. Para isso, basta seguir o tutorial disponível em: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html . E, como também foi utilizado no projeto para consultar informações do dashboard da AWS, é necessário baixar a biblioteca boto3. Para isso, basta rodar o comando abaixo:
+Additionally, it is recommended to **download the AWS Command Line Interface (CLI)**.  For that, simply follow the tutorial available at: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html . Since Boto3 was also used in the project to query information from the AWS dashboard, you need to install it as well. Run the command below:
 
 `pip install boto3`
 
-### Configuração de credenciais
+### Configuring Credentials
 
-Por fim, não menos importante, você precisa ter credenciais na AWS: o ACESS_KEY_ID e o SECRET_ACCESS_KEY. É por meio dessas credenciais que você conseguirá utilizar os recursos da AWS no Terraform. Sendo assim, mais uma vez abra o terminal e (no caso do sistema operacional Linux) procure pelo documento .bashrc (normalmente ele fica na root ~). 
+Finally, it is crucial to have AWS credentials: o ACESS_KEY_ID e o SECRET_ACCESS_KEY. É por meio dessas credenciais que você conseguirá utilizar os recursos da AWS no Terraform. These credentials allow you to use AWS resources in Terraform. Open the terminal and locate the .bashrc document (usually found in the root ~ directory) on your Linux system.
 
-Abra o documento:
+Open the document:
 
 `nano .bashrc`
 
-E escreva no fim do documento as seguintes linhas:
+Then, add the following lines at the end of the document:
 
 ```
 export AWS_ACCESS_KEY_ID= <SUA_ACCESS_KEY>
@@ -95,87 +95,84 @@ export AWS_SECRET_ACCESS_KEY= <SUA_SECRET_ACCESS_KEY>
 
 ```
 
-Feito isso, volte para a pasta onde está trabalhando e rode o seguinte comando:
+Now, go back to your working directory and run the following command:
 
 `source ~/.bashrc`
 
-Ainda você também terá que colocar essas chaves em outro documento. Mais uma vez vá até o diretório raiz e procure pela pasta `.aws`. Acesse-a pelo terminal e crie um documento chamado credentials, através do comando abaixo:
+You will also need to place these keys in another document. Again, navigate to the root directory and look for the `.aws` folder. Access it via the terminal and create a file named `credentials`, with the command below:
 
 `touch credentials`
 
-Depois edite o documento através do comando:
+Next, edit the file with:
 
 `nano credentials`
 
-Escreve as seguintes linhas:
+Add the following lines:
 
 ```[default]
 aws_access_key_id=<sua_access_key>
 aws_secret_access_key=<sua_secret_access_key>
 ```
 
-#### CUIDADO :warning: :no_entry_sign: : NÃO PUBLIQUE ESSAS CHAVES DE MANEIRA ALGUMA.
+#### WARNING :warning: :no_entry_sign: : DO NOT PUBLISH THESE KEYS UNDER ANY CIRCUMSTANCES.
 
 
-### Conferir permissões
+### Checking Permissions
 
-Com tudo isso feito, confira que seu usuário possui todas as permissões de administrador, é isso que irá possibilitar você criar, listar e deletar recursos em diferentes regiões. Para isso, comece acessando o console:
+With everything set up, ensure your user has administrative permissions, which will allow you to create, list, and delete resources in different regions. To do this, access the console:
 
 
 ![WhatsApp Image 2022-11-24 at 21 33 51](https://user-images.githubusercontent.com/62647438/203878313-dad61a6c-53d3-435f-93c4-2c3bdfe6cb81.jpeg)
 
 
-Feito isso, acesse a aba do IAM e encontre o seu usuário. Feito isso, clique nele e confira se você possui a permissão de administrador, como pode ser visto abaixo:
+Then, go to the IAM section and find your user. Click on it and check if you have administrative permission, as shown below:
 
 
 ![WhatsApp Image 2022-11-24 at 21 33 35](https://user-images.githubusercontent.com/62647438/203878325-547cab91-aa01-4bd3-b9d2-83ffd090226d.jpeg)
 
 
-Pronto, agora sim vamos à aplicação.
+Now, let's proceed to the application.
 
 
+## Starting with the Application :computer:
 
-## Iniciando sobre a aplicação :computer:
 
-
-Depois de instalar e de configurar tudo o que era necessário, agora sim você pode clonar este repositório. Para isso basta abrir o terminal na pasta que você criou e digitar o seguinte comando:
+After installing and configuring everything necessary, you can clone this repository. To do this, open the terminal in the folder you created and type the following command:
 
 `git clone https://github.com/Lihsayuri/AWS-projeto-Cloud`
 
-Entre na pasta learn-terraform-aws-instance e abra o documento main_project.py em seu editor de código favorito (aconselho abrir no VsCode). 
+Navigate to the `learn-terraform-aws-instance` folder and open the `main_project.py` file in your favorite code editor (I recommend using VsCode).
 
-Depois é só rodar o código e ir respondendo as questões perguntadas no próprio terminal. A seguinte tela deverá ser vista por você:
+Then, simply run the code and follow the prompts in the terminal. You should see the following screen:
 
 ![WhatsApp Image 2022-11-24 at 21 36 40](https://user-images.githubusercontent.com/62647438/203878531-235f3c0e-8a71-4a97-aa30-ba5ccb7db613.jpeg)
 
 
-Você poderá escolher entre as seguintes opções no menu:
+You can choose from the following options in the menu:
 
         
-    0 - Manual de uso da aplicação; 
-    1 - Iniciar uma instância existente;
-    2 - Parar uma instância existente;
-    3 - Criar uma nova instância e security groups;
-    4 - Destruir algum recurso;
-    5 - Listar recursos;
-    6 - Criar um usuário; 
-    7 - Aplicar todas alterações feitas em uma região;
-    8 - Mudar a região onde você está trabalhando;
-    9 - Sair do programa
+    0 - Manual de uso da aplicação/ User manual for the application; ; 
+    1 - Iniciar uma instância existente/ Start an existing instance;
+    2 - Parar uma instância existente/ Stop an existing instance;
+    3 - Criar uma nova instância e security groups/ Create a new instance and security groups;
+    4 - Destruir algum recurso/ Destroy a resource;
+    5 - Listar recursos/ List resources;
+    6 - Criar um usuário/ Create a user; 
+    7 - Aplicar todas alterações feitas em uma região/ Apply all changes made in a region;
+    8 - Mudar a região onde você está trabalhando/ Change the region you are working in;
+    9 - Sair do programa/ Exit the program
 
 
-Basta escolher uma dessas opções que o programa fará o resto para você. É recomendado ler o manual antes de escolher as outras opções.
+Simply select one of these options, and the program will take care of the rest. It is recommended to read the manual before selecting any other options.
 
 
-## Manual de uso :bookmark_tabs: :
+## User Manual :bookmark_tabs: :
 
-===================================================================================================
+Portuguese version:
 
     Bem-vindo ao manual de uso da aplicação de criação de recursos na AWS.
-
-===================================================================================================
-
-    A aplicação foi desenvolvida para facilitar a criação de instâncias na AWS, com a possibilidade de criar
+    
+        A aplicação foi desenvolvida para facilitar a criação de instâncias na AWS, com a possibilidade de criar
     instâncias com diferentes configurações de segurança (grupos de segurança) que possuem diferentes regras.
 
     Dessa forma, você poderá:
@@ -208,40 +205,80 @@ Basta escolher uma dessas opções que o programa fará o resto para você. É r
     - Mudanças só serão feitas se você selecionar a opção aplicar mudanças.
     - Para acessar a senha do usuário e poder mexer no console da AWS, primeiro você terá que selecionar a opção para aplicar as mudanças e depois de aplicadas, como output do programa você terá as informações sobre os usuários criados, o que inclue as senhas de 10 dígitos.
 
+English version:
 
-## Informações sobre a construção do código  :construction_worker: :computer:
+    Welcome to the user manual for the AWS resource creation application.
 
-De maneira geral o código da aplicação foi construído no arquivo `main_project.py` por meio de uma função principal : a `main()`, que chama várias outras funções de acordo com as respostas do usuário. Ou seja, essa aplicação tem um loop principal que é responsável por sempre carregar o menu até que o usuário peça para sair (ou caso aconteça algum erro que infelizmente não tenha sido tratado, mas nesse caso basta rodar a aplicação e tentar de novo :) ). A partir desse loop, outras funções vão sendo chamadas e vão escrevendo todas as respostas do usuário em um arquivo de variáveis no formato json (por ser mais fácil de manipular em conjunto com o Python).
+    The application was developed to facilitate the creation of instances in AWS, with the ability to create instances with different security configurations (security groups) that have different rules.
+    With this application, you will be able to:
 
-E são essas variáveis que serão preenchidas nos blocos de código dos arquivos do Terraform. Dessa forma, a estrutura e a conexão do Python com o Terraform pode ser descrita de seguinte forma:
+    - Create instances with a name, machine image, and host type.
+    - Create security groups and associate them with these machines.
+    - Create security rules for the security groups.
+    - Create a user with access permissions to AWS resources.
+    - List created resources, such as instances, security groups, their rules, and users.
+    - Delete instances, security groups, security group rules, and users (that you created).
+        
+    Note for this application:
+    
+    - You must have Python 3.8.5 or higher installed.
+    - You must have Terraform 0.14.5 or higher installed.
+    - You must have AWS CLI 2.1.19 or higher installed.
+    - You must have Boto3 1.17.19 or higher installed.
+    - You must have JSON 2.0.9 or higher installed.
+    - You must have OS 1.0.1 or higher installed.
 
-- O Python retém as informações do usuário e as utiliza para escrever um arquivo de variáveis no formato json.
-- Esse arquivo no formato json é interpretado pelo Terraform como os valores de entrada para as variáveis que possuem seu formato descrito e que foram declaradas no arquivo `variables.tf`. 
-- Cada variável do arquivo `variables.tf` pode ser chamada por outros arquivos do terraform (que são blocos de código criando recursos e captando informações importantes) através de uma citação var.(nome da variável).
-- Logo, a sequência é: informação sai do Python e vai pro arquivo json, esse arquivo json provê os valores de entrada para as variáveis declaradas em `variables.tf`, e essas variáveis vão sendo preenchidas nos arquivos do Terraform sendo usadas de uma maneira dinâmica - isto é, que pode mudar, não será sempre a mesma coisa [a não ser que o usuário sempre peça as mesmas coisas].
+    Usage notes for the application:
+    
+    - You must have an AWS account.
+    - You must have a user with permissions to access AWS resources.
+    - You should place your user credentials in the ~/.bashrc file or another file that loads environment variables. Simply add the following lines to the file:
 
-Vale lembrar que no programa em Python foram feitas algumas conferências em relação à resposta do usuário, como checagens para algumas respostas mas não para todas. Dessa forma, **certifique-se de responder exatamente aquilo que está sendo pedido**.
+        export AWS_ACCESS_KEY_ID = SUA_ACCESS_KEY_ID"
+        export AWS_SECRET_ACCESS_KEY = "SUA_SECRET_ACCESS_KEY"        
 
-Ademais, é importante ressaltar que como o objetivo é automatizar e facilitar o uso da AWS através do Terraform, muitos dos recursos são de certe forma pré-definidos. Por exemplo, caso o usuário quando for criar outros usuários queira estabelecer certas restrições para esses, ele poderá escolher entre três opções de restrição: apenas ler, apenas ler e criar, e apenas ler, criar e deletar.
+        Then run the command: source ~/.bashrc or another depending on the file you placed the environment variables in.
+
+    Notes on resource management:
+    - You cannot completely delete the security group of an instance. Therefore, if you choose this option, all rules (except for the default rule that comes with the instance creation in AWS) will be deleted.
+    - The restrictions you will apply to the user are predefined to facilitate your configuration.
+    - Changes will only be made if you select the option to apply changes.
+    - To access the user's password and use the AWS console, you must first select the option to apply the changes. After applying, the output of the program will provide information about the created users, including 10-digit passwords.
 
 
-## Detalhamento sobre a construção do código 
+## Code Construction  :construction_worker: :computer:
 
-## Arquivos principais do Terraform
+In general, the application code was built in the `main_project.py` file through a main function: `main()`, which calls several other functions according to the user's responses. This application has a main loop that is responsible for continuously loading the menu until the user requests to exit (or if an error occurs that unfortunately has not been handled; in that case, just run the application and try again :) ). From this loop, other functions are called and write all user responses to a variables file in JSON format (as it is easier to manipulate together with Python).
 
-A essa altura você já deve ter entendido que o Terraform é quem provisionará todos os recursos necessários para construir a infraestrutura. Mas como? Bem, como dito antes, o Terraform possui uma linguagem declarativae cada bloco de código possui uma função. Dentre eles temos os: resources, data e outputs. Os `resources` são responsáveis por descrever os recursos a serem criados, enquanto o `data` representa dados que podem ser usados pelo Terraform embora possam ter sido definidos fora dele, e os `outputs` são dados retornados pelo próprio Terraform que informam sobre a sua infraestrutura.
+These variables will be populated in the code blocks of the Terraform files. Thus, the structure and connection between Python and Terraform can be described as follows:
 
-E como esses blocos foram organizados? Para cada região - no caso do projeto estamos usando apenas a `us-east-1` e a `us-west-1` - cada infraestrutura é formada pelos seguintes arquivos Terraform: `main.tf`, `instances.tf`, `sec_group`, `autoscaling.tf`, `data.tf` e `output.tf`. E são estruturados da seguinte maneira:
+- Python retains the user information and uses it to write a variable file in JSON format.
+- This JSON file is interpreted by Terraform as the input values for the variables defined in the `variables.tf` file. 
+- Each variable in the `variables.tf` file can be referenced by other Terraform files (which are code blocks creating resources and capturing important information) through a var.(variable_name) citation.
+- Therefore, the sequence is: information flows from Python to the JSON file, this JSON file provides input values for the variables declared in `variables.tf`, and these variables are filled in the Terraform files in a dynamic way — meaning they can change, they will not always be the same (unless the user always requests the same things).
 
-- main.tf: É no main que os recursos básicos como nosso provedor, região, VPC, subnetes e gateway são provisionados. É a partir dessa estrutura básica que será possível criar instâncias e security groups e suas regras. Lembre-se: a sua nuvem virtual privada está dentro de uma região e possui subnetes onde as instâncias serão criadas. 
+It is worth noting that in the Python program, several checks were made regarding the user's responses, such as checks for some answers but not for all. Therefore, **make sure to answer exactly what is being asked**.
 
-- instances.tf : É nesse documento que as instâncias são criadas e que security groups são associados. 
+Moreover, it is important to highlight that the goal is to automate and simplify the use of AWS through Terraform, many resources are indeed predefined. For example, if the user wishes to impose certain restrictions when creating other users, they can choose from three restriction options: read-only, read and create, or read, create, and delete.
 
-- sec_group.tf: É nesse documento que os security groups e suas regras são criados. 
 
-- autoscaling.tf: É nesse documento que o Load Balancer, o Auto-Scaling Group e a configuração para começar uma nova instâncias estão configurados. 
+## Code Construction Details
 
-Como exemplo, temos um pedaço do código do `main.tf` abaixo:
+## Main Terraform Files
+
+At this point, you should understand that Terraform is responsible for provisioning all the necessary resources to build the infrastructure. But how? Well, as mentioned before, Terraform has a declarative language and each code block has a function. Among them, we have: resources, data, and outputs. The `resources` are responsible for describing the resources to be created, while `data` represents data that can be used by Terraform even if it has been defined outside of it, and `outputs` are data returned by Terraform itself that inform about your infrastructure.
+
+So how are these blocks organized? For each region — in this case, we are using only `us-east-1` and `us-west-1` - each infrastructure is made up of the following Terraform files: `main.tf`, `instances.tf`, `sec_group`, `autoscaling.tf`, `data.tf` e `output.tf`. They are structured as follows:
+
+- main.tf: It is in main that the basic resources such as our provider, region, VPC, subnets, and gateway are provisioned. From this basic structure, it will be possible to create instances and security groups and their rules. Remember: your virtual private cloud is within a region and has subnets where instances will be created.
+
+- instances.tf : This document is where instances are created and where security groups are associated.
+
+- sec_group.tf: This document is where security groups and their rules are created.
+
+- autoscaling.tf: This document is where the Load Balancer, Auto-Scaling Group, and the configuration to start a new instance are set up.
+
+For example, here’s a snippet from the `main.tf` code below:
 
 ``` terraform 
 resource "aws_vpc" "main" {
@@ -254,12 +291,12 @@ resource "aws_vpc" "main" {
 }
 ```
 
-Lembra que eu havia comentado sobre o `var.[nome_da_variável]`? Pois é, você vai enteder a importâncias desse argumento
+Remember that I mentioned `var.[variable_name]`? You will understand the importance of this argument.
 
 
-## Variáveis no projeto
+## Variables in the Project
 
-É por isso que o arquivo `variables.tf` existe. Nele foram declaradas todas as variáveis que seriam usadas de maneira dinâmica, isto é, aquelas que não são sempre fixas e que o usuário tem o poder de escolha. Mas esse documento apenas declara o formato das variáveis como você pode ver abaixo:
+That’s why the `variables.tf` file exists. In it, all variables that will be used dynamically were declared, meaning those that are not always fixed and that the user has the power of choice. But this document only declares the format of the variables as you can see below:
 
 ``` terraform
 variable "aws_region" {
@@ -283,9 +320,9 @@ variable "virtual_machines" {
 
 ```
 
-As variáveis preenchidas mesmo vem de um outro arquivo : o .auto.tfvars.json (que muda um pouquinho de nome dependendo da região). É nele que os inputs do usário serão inseridos, e é daí que as variáveis declaradas no `variables.tf` irão buscar as informações. E, com elas corretamente definidas, basta apenas chamar o argumento `var.` mais o nome da variável de interesse que esses valores dinamicamente configurados serão preenchidos pelos blocos de `resources` nos outros arquivos do Terraform. 
+The variables themselves come from another file: .auto.tfvars.json (which changes its name slightly depending on the region). It is here that the user inputs will be inserted, and from there the variables declared in `variables.tf` will pull the information. And with them correctly defined, you just need to call the `var`. argument plus the variable name of interest for these dynamically configured values to be filled in the `resources` blocks in the other Terraform files.
 
-Para você visualizar melhor esse arquivo em `.json`, um exemplo dele pode ser visto abaixo:
+To give you a better view of this `.json` file, an example can be seen below:
 
 
 ``` json
@@ -305,7 +342,7 @@ Para você visualizar melhor esse arquivo em `.json`, um exemplo dele pode ser v
 }
 ```
 
-Mas e se eu quiser criar vários recursos de uma vez? É aqui que entra a função `for_each`, que é capaz de percorrer listas, maps e objetos para definir uma variável com múltiplos valores - que é o que permite criar múltiplas instâncias, security groups e usuários. Um exemplo dela em ação pode ser visto a seguir:
+But what if I want to create multiple resources at once? This is where the `for_each` function comes in, which can iterate over lists, maps, and objects to define a variable with multiple values — enabling the creation of multiple instances, security groups, and users. An example of it in action can be seen below:
 
 ``` terraform
 resource "aws_instance" "app_server" {
@@ -323,36 +360,35 @@ resource "aws_instance" "app_server" {
 }
 ```
 
-## Regiões, VPCs e Subnets
+## Regions, VPCs and Subnets
 
-Como comentado anteriormente estamos trabalhando apenas com 2 regiões, e isso foi feito através do Python que troca de pastas dependendo da região que o usuário escolher - a us-east-1 ou a us-west-1. Sendo assim, tudo aquilo que o usuário der deploy em uma região, ficará naquela região - do mesmo modo, tudo o que ele destruir naquela região será destruído apenas ali. 
+As mentioned earlier, we are working with only 2 regions, and this was done through Python, which switches folders depending on the region the user chooses — either `us-east-1` or `us-west-1`. Thus, everything the user deploys in one region will remain in that region — likewise, everything they destroy in that region will only be destroyed there.
 
-Além disso, dentro de cada região existe uma VPC com valores de IP fixos e sem possibilidade de ser alterado pelo usuário: no caso da região us-east-1 o bloco CIDR é 10.0.0.0/16 e no caso da região us-west-1 este bloco muda para: 172.16.0.0/16. Por fim, as subnets ficam dentro de cada uma dessas VPCs e também são determinadas levando em consideração o próprio intervalo de IPs da VPC.
+Additionally, within each region, there is a VPC with fixed IP values that cannot be changed by the user: in the case of the `us-east-1` region, the CIDR block is `10.0.0.0/16`, and in the `us-west-1` region, this block changes to `172.16.0.0/16`. Finally, the subnets are located within each of these VPCs and are also determined based on the IP range of the VPC.
 
-### Usuários
+### Users
 
-Para criar os usuários, foi criada uma pasta separada com recursos e dados apenas para esse fim, isso porque independente da região acessada, os usários são os mesmos. Dessa forma, da maneira que o projeto foi feito, os recursos dos usuários estão contemplados no documento `iam.tf` e seus dados e outputs em `data.tf` e `output.tf`, respectivamente (todos esses documentos estão dentro da pasta terraform-users).
+To create users, a separate folder was created with resources and data specifically for this purpose because, regardless of the accessed region, the users remain the same. Thus, as the project was structured, the user resources are included in the `iam.tf` document, and their data and outputs are found in `data.tf` and `output.tf`, respectively (all these documents are within the `terraform-users` folder).
 
-Toda vez que você criar um usuário e aplicar as mudanças, como output você verá a senha informações e a senha de acesso ao console da AWS desse usuário criado. 
+Every time you create a user and apply the changes, the output will show you the access password and the AWS console access information for that created user.
 
 ### High Availability
 
-Por fim, foi implementada alta disponibilidade para servidores web na região us-east-1. Dessa forma, quando uma instância com a imagem criada por mim for lançada, se o seu consumo de CPU chegar a 50% em média, em cerca de 2 minutos uma nova instância será criada. E caso isso ocorra novamente, mais outra instância será lançada - isso porque configurei no máximo 3 instâncias para suprir a necessidade na aplicação. Além disso, se depois de 2 minutos a média de consumo for menor que 10%, essas instâncias serão desligadas. Isso pode ser testado com um teste de stress que pode ser feito com o seguinte comando após ter acessada a instância via ssh:
+Finally, high availability has been implemented for web servers in the us-east-1 region. When an instance created from my image is launched, if its CPU usage reaches an average of 50%, a new instance will be created in about 2 minutes. If this occurs again, another instance will be launched — this is because I configured a maximum of 3 instances to meet the application's needs. Furthermore, if after 2 minutes the average usage is below 10%, those instances will be shut down. This can be tested with a stress test that can be executed with the following command after accessing the instance via SSH:
 
 `stress --cpu 8 --timeout 300`
 
-Isso é possível pois o load balancer aponta para um grupo - o target group- que foi definido com as instâncias. Dessa forma, através de alarmes que estarão monitorando o uso da CPU, conforme o limite seja atingido (tanto acima quanto abaixo), ele executará uma `policy` configurada que irá criar ou desligar as instâncias. E quando ela for criada, ela utilizará como imagem um template criado por mim que já possui uma simples aplicação web-server só para testes - que sempre será executada quando a instância for acessada (isso foi feito por meio do comando `crontab`) - , além de já possuir o módulo `stress` instalado. Lembrando que para cada recurso as portas certas foram liberadas para permitir o acesso à aplicação e ao ssh. 
+This is possible because the load balancer points to a group — the target group — which is defined with the instances. Thus, through alarms that will monitor CPU usage, when the threshold is reached (both above and below), it will execute a configured policy that will create or shut down instances. When created, it will use an image template created by me that already has a simple web-server application for testing — which will always be executed when the instance is accessed (this was done via the `crontab` command) — and already has the `stress` module installed. Remember that the correct ports have been opened for each resource to allow access to the application and SSH.
 
-**Atenção: o teste demora um pouco, mas está funcionando :) e isso foi implementado apenas para a região us-east-1 no arquivo `autoscaling.tf`** 
+**Note: the test takes a little time, but it is functioning :) and this was implemented only for the us-east-1 region in the `autoscaling.tf` file** 
 
 
-## Notas finais :bookmark:
+## Final Notes :bookmark:
 
-Faça bom uso da aplicação e caso utilize algo retirado daqui, faça referências ao repositório.
-Quaisquer dúvidas sobre o código ou a aplicação, entrar em contato com @Lihsayuri.
+Make good use of the application, and if you use anything from here, please reference the repository. For any questions about the code or the application, please contact  @Lihsayuri.
 
-## Referências:
+## References:
 
-- Terraform (documentação e exemplos de códigos);
-- Roteiros de aula e os professores: Rodolfo Avelino e Tiago Demay.
+- Terraform (documentation and code examples);
+- Class outlines and professors: Rodolfo Avelino and Tiago Demay.
 
